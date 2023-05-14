@@ -3,7 +3,9 @@
 - Store data as attributes
 - Import sequence of files 
 
-<img src="tpms.gif" width="50%"/>
+<p align="center">
+  <img src="tpms.gif" width="50%"/>
+</p>
 
 # Installation
 - Download the ZIP file from this repository
