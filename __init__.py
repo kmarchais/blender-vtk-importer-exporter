@@ -25,6 +25,29 @@ filepath = ""
 files_pattern = ""
 file_list = []
 
+def create_mesh(data_object, mesh_name):
+    faces = []
+    if isinstance(data_object, pv.PolyData) and data_object.n_faces > 0:
+        if not data_object.is_all_triangles():
+            data_object = data_object.triangulate()
+        faces = np.reshape(data_object.faces, (data_object.n_faces, 4))[:, 1:]
+    elif isinstance(data_object, pv.UnstructuredGrid) and data_object.n_cells > 0:
+        faces = np.reshape(data_object.cells, (data_object.n_cells, 4))[:, 1:]
+
+    mesh = bpy.data.meshes.new(mesh_name)
+    mesh.from_pydata(vertices=data_object.points, edges=[], faces=faces)
+    mesh.update()
+
+    obj = bpy.data.objects.new(mesh_name, mesh)
+    bpy.context.scene.collection.objects.link(obj)
+
+    for key, value in data_object.point_data.items():
+        if key == "id":
+            key = "id_" # id is a reserved keyword
+        attr = bpy.data.meshes[obj.name].attributes.new(key, type='FLOAT', domain='POINT')
+        attr.data.foreach_set('value', value)
+
+
 
 class ImportVTK(bpy.types.Operator, ImportHelper):
     """Load a VTK file"""
@@ -33,7 +56,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
 
     filename_ext = ".vtk"
     filter_glob: StringProperty(
-        default="*.vtk;*.vtu;*.vtp",
+        default="*.vtk;*.vtu;*.vtp;*.vtm",
         options={'HIDDEN'},
         maxlen=255,  # Max internal buffer length, longer would be clamped.
     )
@@ -56,31 +79,16 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         filepath = self.filepath
         files_pattern = self.pattern
         
-        polydata = pv.read(filepath)
+        data = pv.read(filepath)
         mesh_name = os.path.basename(filepath)
         if self.import_sequence:
             mesh_name = files_pattern
 
-        faces = []
-        if isinstance(polydata, pv.PolyData) and polydata.n_faces > 0:
-            if not polydata.is_all_triangles():
-                polydata = polydata.triangulate()
-            faces = np.reshape(polydata.faces, (polydata.n_faces, 4))[:, 1:]
-        elif isinstance(polydata, pv.UnstructuredGrid) and polydata.n_cells > 0:
-            faces = np.reshape(polydata.cells, (polydata.n_cells, 4))[:, 1:]
-
-        mesh = bpy.data.meshes.new(mesh_name)
-        mesh.from_pydata(vertices=polydata.points, edges=[], faces=faces)
-        mesh.update()
-
-        obj = bpy.data.objects.new(mesh_name, mesh)
-        bpy.context.scene.collection.objects.link(obj)
-
-        for key, value in polydata.point_data.items():
-            if key == "id":
-                key = "id_" # id is a reserved keyword
-            attr = bpy.data.meshes[obj.name].attributes.new(key, type='FLOAT', domain='POINT')
-            attr.data.foreach_set('value', value)
+        if isinstance(data, pv.MultiBlock):
+            for key in data.keys():
+                create_mesh(data[key], f"{mesh_name} : {key}")
+        else:
+            create_mesh(data, mesh_name)
 
         if self.import_sequence:
             bpy.app.handlers.frame_change_pre.append(update_attributes)
@@ -110,7 +118,7 @@ def update_attributes(scene):
 
     
 def menu_func_import(self, context):
-    self.layout.operator(ImportVTK.bl_idname, text="VTK (.vtk, .vtu, .vtp)")
+    self.layout.operator(ImportVTK.bl_idname, text="VTK (.vtk, .vtu, .vtp, .vtm)")
 
 def register():
     bpy.utils.register_class(ImportVTK)

@@ -1,5 +1,5 @@
 # blender-vtk-importer
-- Import VTK files 
+- Import VTK files (VTK, VTU, VTP, VTM)
 - Store data as attributes
 - Import sequence of files 
 
