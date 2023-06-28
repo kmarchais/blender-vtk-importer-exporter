@@ -80,7 +80,10 @@ def create_mesh(data_object, mesh_name):
         convert_mesh_to_pointcloud(mesh_name)
 
 @persistent
-def update_attributes(scene):
+def update_attributes_from_vtk(scene):
+    if "vtk_files" not in bpy.context.scene and "vtk_directory" not in bpy.context.scene:
+        return
+
     frame = scene.frame_current
     print(f"\nframe : {frame}")
 
@@ -166,7 +169,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         if max_frame != 0:
             # while len(bpy.app.handlers.frame_change_pre) > 1:
             #     bpy.app.handlers.frame_change_pre.pop()
-            bpy.app.handlers.frame_change_post.append(update_attributes)
+            bpy.app.handlers.frame_change_post.append(update_attributes_from_vtk)
 
             bpy.context.scene.frame_start = 0
             bpy.context.scene.frame_end = max_frame

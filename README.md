@@ -16,5 +16,5 @@
   - `import sys, subprocess; subprocess.call([sys.executable, '-m', 'pip', 'install', 'pyvista'])`
 
 # TODO
-- Manage frame_change_pre/frame_change_post to work with a saved blend file
 - Fix real colors of the colormaps
+- Preferences panel
