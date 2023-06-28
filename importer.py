@@ -169,7 +169,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         if max_frame != 0:
             # while len(bpy.app.handlers.frame_change_pre) > 1:
             #     bpy.app.handlers.frame_change_pre.pop()
-            bpy.app.handlers.frame_change_post.append(update_attributes_from_vtk)
+            # bpy.app.handlers.frame_change_post.append(update_attributes_from_vtk)
 
             bpy.context.scene.frame_start = 0
             bpy.context.scene.frame_end = max_frame

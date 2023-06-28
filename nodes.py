@@ -1,5 +1,6 @@
 import bpy
 import matplotlib.pyplot as plt
+from .cmap import coolwarm, viridis
 
 
 def create_attribute_material(mesh_name, attributes):
@@ -29,17 +30,13 @@ def create_attribute_material(mesh_name, attributes):
     color_ramp_nodes = []
     for index, colormap in enumerate(colormaps):
         color_ramp_node = mat.node_tree.nodes.new("ShaderNodeValToRGB")
-        n_colors = 8
-        for i in range(1, n_colors - 1):
-            color_ramp_node.color_ramp.elements.new(i / (n_colors - 1))
-
-        try:
-            cmap = plt.get_cmap(colormap).colors
-            step = len(cmap) // n_colors
-            for i in range(n_colors):
-                color_ramp_node.color_ramp.elements[i].color = (*cmap[i * step], 1)
-        except:
-            pass
+        n_colors = 32
+        cmap = plt.get_cmap(colormap)
+        for i in range(n_colors):
+            location = i / (n_colors - 1)
+            if i != 0 and i != n_colors - 1:
+                color_ramp_node.color_ramp.elements.new(location)
+            color_ramp_node.color_ramp.elements[i].color = cmap(location)
 
         color_ramp_node.select = False
         color_ramp_node.location = (bsdf.location.x - color_ramp_node.width - 50,

@@ -16,7 +16,7 @@ bl_info = {
 }
 
 
-DEPENDENCIES = ['pyvista', 'numpy']
+DEPENDENCIES = ['pyvista', 'numpy', 'matplotlib', 'cmcrameri']
 
 def menu_func_import(self, context):
     self.layout.operator(ImportVTK.bl_idname, text="VTK (.vtk, .vtu, .vtp, .vtm)")
