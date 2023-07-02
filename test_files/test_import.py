@@ -20,7 +20,7 @@ if isinstance(vtk, pv.UnstructuredGrid):
     print(len(vtk.cells), vtk.n_cells)
     vtk = vtk.extract_surface()
     
-    if not vtk.is_all_triangles():
+    if not vtk.is_all_triangles:
         vtk = vtk.triangulate()
     faces = np.reshape(vtk.faces, (vtk.n_faces, 4))[:, 1:]
 

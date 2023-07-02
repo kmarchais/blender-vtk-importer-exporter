@@ -9,7 +9,7 @@ from bpy.app.handlers import persistent
 import pyvista as pv
 import numpy as np
 
-from .nodes import convert_mesh_to_pointcloud, create_attribute_material
+from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
 
 def sort_files(file_list):
     sorted_file_list = []
@@ -37,7 +37,7 @@ def create_mesh(data_object, mesh_name):
         data_object = data_object.extract_geometry()
         # faces = np.reshape(data_object.cells, (data_object.n_cells, 4))[:, 1:]
 
-    if not data_object.is_all_triangles():
+    if not data_object.is_all_triangles:
         data_object = data_object.triangulate()
     faces = np.reshape(data_object.faces, (data_object.n_faces, 4))[:, 1:]
 
@@ -46,35 +46,47 @@ def create_mesh(data_object, mesh_name):
     mesh.update()
 
     obj = bpy.data.objects.new(mesh_name, mesh)
+    obj["data_range"] = {}
     bpy.context.scene.collection.objects.link(obj)
 
-    attributes = []
 
-    for key, value in data_object.point_data.items():
-        if key == "id":
-            key = "id_" # id is a reserved keyword
-        value_type = 'FLOAT'
-        if len(value.shape) == 2:
-            value_type = 'FLOAT_VECTOR'
-        attr = bpy.data.meshes[obj.name].attributes.new(key, type=value_type, domain='POINT')
-        attr.data.foreach_set('value', value)
+    if len(data_object.point_data.keys()) or len(data_object.cell_data.keys()):
+        mat = bpy.data.materials.new(name=f"{mesh_name}_attributes")
+        mat["attributes"] = {}
+        attributes = []
+
+        for key, value in data_object.point_data.items():
+            if key == "id":
+                key = "id_" # id is a reserved keyword
+            value_type = 'FLOAT'
+            if len(value.shape) == 2:
+                value_type = 'FLOAT_VECTOR'
+            attr = bpy.data.meshes[obj.name].attributes.new(key, type=value_type, domain='POINT')
+            attr.data.foreach_set('value', value)
+            
+            attributes.append({"name": key, "min_value": np.min(value), "max_value": np.max(value)})
+            min_value = np.min(value).item()
+            max_value = np.max(value).item()
+            mat["attributes"][key] = {"current_frame_min": min_value, "current_frame_max": max_value,
+                                    "global_min": min_value, "global_max": max_value}
         
-        attributes.append({"name": key, "min_value": np.min(value), "max_value": np.max(value)})
-    
-    
-    for key, value in data_object.cell_data.items():
-        if key == "id":
-            key = "id_" # id is a reserved keyword
-        value_type = 'FLOAT'
-        if len(value.shape) == 2:
-            value_type = 'FLOAT_VECTOR'
-        attr = bpy.data.meshes[obj.name].attributes.new(key, type=value_type, domain='FACE')
-        attr.data.foreach_set('value', value)
         
-        attributes.append({"name": key, "min_value": np.min(value), "max_value": np.max(value)})
+        for key, value in data_object.cell_data.items():
+            if key == "id":
+                key = "id_" # id is a reserved keyword
+            value_type = 'FLOAT'
+            if len(value.shape) == 2:
+                value_type = 'FLOAT_VECTOR'
+            attr = bpy.data.meshes[obj.name].attributes.new(key, type=value_type, domain='FACE')
+            attr.data.foreach_set('value', value)
+            
+            attributes.append({"name": key, "min_value": np.min(value), "max_value": np.max(value)})
+            min_value = np.min(value).item()
+            max_value = np.max(value).item()
+            mat["attributes"][key] = {"current_frame_min": min_value, "current_frame_max": max_value,
+                                    "global_min": min_value, "global_max": max_value}
     
-    if attributes:
-        create_attribute_material(mesh_name, attributes)
+        create_attribute_material_nodes(mesh_name)
 
     if data_object.n_faces == 0 and "radius" in data_object.point_data.keys():
         convert_mesh_to_pointcloud(mesh_name)
@@ -99,9 +111,10 @@ def update_attributes_from_vtk(scene):
             mesh = bpy.data.meshes[mesh_name]
 
             mesh.attributes["position"].data.foreach_set('vector', np.ravel(polydata.points))
+            # mesh_attributes = bpy.context.scene["mesh_attributes"][mesh_name]
+            mat = bpy.data.materials[f"{mesh_name}_attributes"]
 
             for key, value in polydata.point_data.items():
-                print(f"attribute : {key}\tmin : {np.min(value)}\tmax : {np.max(value)}")
                 if key == "id":
                     key = "id_"
                 if key not in mesh.attributes.keys():
@@ -111,8 +124,15 @@ def update_attributes_from_vtk(scene):
                     mesh.attributes.new(key, type=value_type, domain='POINT')
                 mesh.attributes[key].data.foreach_set('value', value)
 
+                frame_min = np.min(value).item()
+                frame_max = np.max(value).item()
+                global_min = mat["attributes"][key]["global_min"]
+                global_max = mat["attributes"][key]["global_max"]
+                print(f"attribute : {key}\tmin : {frame_min}\tmax : {frame_max}\tglobal_min : {global_min}\tglobal_max : {global_max}")
+                mat["attributes"][key]["global_min"] = min(frame_min, global_min)
+                mat["attributes"][key]["global_max"] = max(frame_max, global_max)
+
             for key, value in polydata.cell_data.items():
-                print(f"attribute : {key}\tmin : {np.min(value)}\tmax : {np.max(value)}")
                 if key == "id":
                     key = "id_"
                 if key not in mesh.attributes.keys():
@@ -121,6 +141,14 @@ def update_attributes_from_vtk(scene):
                         value_type = 'FLOAT_VECTOR'
                     mesh.attributes.new(key, type=value_type, domain='FACE')
                 mesh.attributes[key].data.foreach_set('value', value)
+
+                frame_min = np.min(value).item()
+                frame_max = np.max(value).item()
+                global_min = mat["attributes"][key]["global_min"]
+                global_max = mat["attributes"][key]["global_max"]
+                print(f"attribute : {key}\tmin : {frame_min}\tmax : {frame_max}\tglobal_min : {global_min}\tglobal_max : {global_max}")
+                mat["attributes"][key]["global_min"] = min(frame_min, global_min)
+                mat["attributes"][key]["global_max"] = max(frame_max, global_max)
 
             mesh.update()
 
@@ -151,6 +179,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
 
         bpy.context.scene["vtk_files"] = files
         bpy.context.scene["vtk_directory"] = directory
+        bpy.context.scene["mesh_attributes"] = {}
 
         for file in files:
             data = pv.read(f"{directory}/{file[0]}")
@@ -167,13 +196,8 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
             max_frame = max(max_frame, len(file) - 1)
 
         if max_frame != 0:
-            # while len(bpy.app.handlers.frame_change_pre) > 1:
-            #     bpy.app.handlers.frame_change_pre.pop()
-            # bpy.app.handlers.frame_change_post.append(update_attributes_from_vtk)
-
             bpy.context.scene.frame_start = 0
             bpy.context.scene.frame_end = max_frame
             bpy.context.scene.frame_current = 0
-
 
         return {'FINISHED'}

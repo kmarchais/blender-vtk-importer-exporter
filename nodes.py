@@ -1,65 +1,56 @@
 import bpy
 import matplotlib.pyplot as plt
-from .cmap import coolwarm, viridis
 
-
-def create_attribute_material(mesh_name, attributes):
-    mat = bpy.data.materials.new(name=f"{mesh_name}_attributes")
+def create_attribute_material_nodes(mesh_name):
+    mat = bpy.data.materials[f"{mesh_name}_attributes"]
     mat.use_nodes = True
 
     bsdf = mat.node_tree.nodes["Principled BSDF"]
     material_output_node = mat.node_tree.nodes["Material Output"]
 
-    attribute_nodes = []
-    map_range_nodes = []
-    for attribute in attributes:
-        attribute_node = mat.node_tree.nodes.new("ShaderNodeAttribute")
-        attribute_node.attribute_name = attribute["name"]
-        attribute_node.label = attribute["name"]
+    
+    key = list(mat["attributes"].to_dict().keys())[0]
 
-        map_range_node = mat.node_tree.nodes.new("ShaderNodeMapRange")
-        map_range_node.label = "Data range"
-        map_range_node.inputs["From Min"].default_value = attribute["min_value"]
-        map_range_node.inputs["From Max"].default_value = attribute["max_value"]
+    attribute_node = mat.node_tree.nodes.new("ShaderNodeAttribute")
+    attribute_node.attribute_name = key
 
-        attribute_nodes.append(attribute_node)
-        map_range_nodes.append(map_range_node)
+    map_range_node = mat.node_tree.nodes.new("ShaderNodeMapRange")
+    map_range_node.label = "Data range"
+    map_range_node.inputs["From Min"].default_value = mat["attributes"][key]["global_min"]
+    map_range_node.inputs["From Max"].default_value = mat["attributes"][key]["global_max"]
 
 
-    colormaps = ["viridis", "plasma", "inferno", "magma", "cividis", "Greys", "Purples", "Blues", "Greens", "Oranges"]
-    color_ramp_nodes = []
-    for index, colormap in enumerate(colormaps):
-        color_ramp_node = mat.node_tree.nodes.new("ShaderNodeValToRGB")
-        n_colors = 32
-        cmap = plt.get_cmap(colormap)
-        for i in range(n_colors):
-            location = i / (n_colors - 1)
-            if i != 0 and i != n_colors - 1:
-                color_ramp_node.color_ramp.elements.new(location)
-            color_ramp_node.color_ramp.elements[i].color = cmap(location)
+    colormap = bpy.context.scene.default_colormap
+    mat.vtk_colormaps = colormap
+    n_colors = 32
+    color_ramp_node = mat.node_tree.nodes.new("ShaderNodeValToRGB")
+    cmap = plt.get_cmap(colormap)
+    color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[-1]) # remove to create it again in the last iteration to have it selected
+    for i in range(n_colors):
+        location = i / (n_colors - 1)
+        if i != 0:
+            color_ramp_node.color_ramp.elements.new(location)
+        color_ramp_node.color_ramp.elements[i].color = [c**2.2 for c in cmap(location)] # sRGB to Linear RGB
 
-        color_ramp_node.select = False
-        color_ramp_node.location = (bsdf.location.x - color_ramp_node.width - 50,
-                                    bsdf.location.y - index * 250)
-        color_ramp_node.label = colormap
-
-        color_ramp_nodes.append(color_ramp_node)
+    color_ramp_node.select = False
+    color_ramp_node.location = (bsdf.location.x - color_ramp_node.width - 50,
+                                bsdf.location.y)
+    color_ramp_node.label = colormap
 
     bsdf.select = False
 
-    for i, (attribute_node, map_range_node) in enumerate(zip(attribute_nodes, map_range_nodes)):
-        attribute_node.select = False
-        map_range_node.select = False
+    attribute_node.select = False
+    map_range_node.select = False
 
-        map_range_node.location = (color_ramp_nodes[0].location.x - map_range_node.width - 50,
-                                       bsdf.location.y - i * 300)
-        attribute_node.location = (map_range_nodes[i].location.x - attribute_node.width - 50,
-                                       bsdf.location.y - i * 300)
+    map_range_node.location = (color_ramp_node.location.x - map_range_node.width - 50,
+                                    bsdf.location.y)
+    attribute_node.location = (map_range_node.location.x - attribute_node.width - 50,
+                                    bsdf.location.y)
 
-        mat.node_tree.links.new(attribute_node.outputs["Fac"], map_range_node.inputs["Value"])
+    mat.node_tree.links.new(attribute_node.outputs["Fac"], map_range_node.inputs["Value"])
 
-    mat.node_tree.links.new(map_range_nodes[0].outputs["Result"], color_ramp_nodes[0].inputs["Fac"])
-    mat.node_tree.links.new(color_ramp_nodes[0].outputs["Color"], bsdf.inputs["Base Color"])
+    mat.node_tree.links.new(map_range_node.outputs["Result"], color_ramp_node.inputs["Fac"])
+    mat.node_tree.links.new(color_ramp_node.outputs["Color"], bsdf.inputs["Base Color"])
     mat.node_tree.links.new(bsdf.outputs["BSDF"], material_output_node.inputs["Surface"])
 
 
