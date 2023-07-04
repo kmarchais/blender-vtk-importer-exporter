@@ -71,7 +71,12 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.object.active_material is not None
+        mat = context.object.active_material
+        if mat is None:
+            return False
+        if mat["attributes"] is None:
+            return FalseA
+        return True
 
     def draw(self, context):
         layout = self.layout

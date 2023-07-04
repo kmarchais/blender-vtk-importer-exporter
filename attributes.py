@@ -23,15 +23,22 @@ def initialize_material_attributes(attr_name, attr_values, mesh, material, domai
     }
 
 def update_material_attributes(attr_name, attr_values, mesh, material, domain):
+    frame_min = np.min(attr_values).item()
+    frame_max = np.max(attr_values).item()
+
     if attr_name == "id":
         attr_name = "id_"
     if attr_name not in mesh.attributes.keys():
         value_type = 'FLOAT' if len(attr_values.shape) == 1 else 'FLOAT_VECTOR'
         mesh.attributes.new(attr_name, type=value_type, domain=domain)
+        material["attributes"][attr_name] = {
+            "current_frame_min": frame_min,
+            "current_frame_max": frame_max,
+            "global_min": frame_min,
+            "global_max": frame_max
+        }
     mesh.attributes[attr_name].data.foreach_set('value', attr_values)
 
-    frame_min = np.min(attr_values).item()
-    frame_max = np.max(attr_values).item()
     global_min = material["attributes"][attr_name]["global_min"]
     global_max = material["attributes"][attr_name]["global_max"]
     print(f"attribute : {attr_name}\tmin : {frame_min}\tmax : {frame_max}\tglobal_min : {global_min}\tglobal_max : {global_max}")

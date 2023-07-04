@@ -4,8 +4,10 @@
 - Import sequence of files 
 
 <p align="center">
-  <img src="tpms.gif" width="50%"/>
+  <img src="images/tpms.gif" width="49%"/>
+  <img src="images/material_properties.png" width="49%">
 </p>
+<img src="images/viridis.png">
 
 # Installation
 - Download the ZIP file from this repository
