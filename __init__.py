@@ -10,7 +10,8 @@ dependencies = {'pip': {}, 'pyvista': {}, 'cmcrameri': {}}
 install_dependencies()
 
 from . import preferences, material_panel
-from .importer import ImportVTK, update_attributes_from_vtk
+from .importer import ImportVTK
+from .attributes import update_attributes_from_vtk
 
 bl_info = {
     "name": "VTK importer",

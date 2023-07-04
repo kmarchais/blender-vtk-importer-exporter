@@ -20,3 +20,7 @@
 - To make the data range fit the minimal and maximal values of the current attribute over all the time steps, the aniation must be played for all frames to initialize the data
 - To reverse the color map, in the material properties > VTK attributes > down arrow > Flip Color Ramp
 - When a VTK file containing only a list of points (no edges, no faces) with a `radius` attribute, the mesh is converted to a point cloud and the render parameters are set to work with `CYCLES` on the GPU.
+
+# TODO
+- Color legend
+- Mesh Edges

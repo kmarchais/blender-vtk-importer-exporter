@@ -53,6 +53,8 @@ def create_attribute_material_nodes(mesh_name):
     mat.node_tree.links.new(color_ramp_node.outputs["Color"], bsdf.inputs["Base Color"])
     mat.node_tree.links.new(bsdf.outputs["BSDF"], material_output_node.inputs["Surface"])
 
+    bpy.data.objects[mesh_name].data.materials.append(mat)
+
 
 def convert_mesh_to_pointcloud(mesh_name):
     bpy.context.scene.render.engine = 'CYCLES'

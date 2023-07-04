@@ -1,6 +1,5 @@
 import bpy
 import matplotlib.pyplot as plt
-from cmcrameri import cm
 
 class VTK_OT_Data_range_all_frames(bpy.types.Operator):
     bl_idname = "vtk.button_all_frames"
@@ -81,7 +80,7 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
 
         row = layout.row()
         row.label(text="Attribute")
-        row.prop(material, "vtk_attributes", text="", icon_value=0, emboss=True)
+        row.prop(data=material, property="vtk_attributes", text="", icon_value=0, emboss=True)
 
         row = layout.row(align=True)
         row.label(text="Data range")
@@ -100,13 +99,12 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
         box.template_color_ramp(color_ramp_node, "color_ramp", expand=True)
 
 def get_availbale_colormaps():
-    colormaps = list(map(lambda cmap: cmap.lower().split(".")[-1], plt.colormaps()))
-    colormaps = list(filter(lambda cmap: cmap[-2:] != "_r", colormaps))
-    return sorted(colormaps)
+    colormaps = list(filter(lambda cmap: cmap[-2:] != "_r", plt.colormaps()))
+    return sorted(colormaps, key=lambda s: s.split('.')[-1].lower())
 
 def vtk_enum_colormaps(self, context):
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
-    return [(cmap, cmap, cmap) for cmap in get_availbale_colormaps()]
+    return [(cmap, cmap.split('.')[-1], cmap) for cmap in get_availbale_colormaps()]
 
 def vtk_enum_attributes(self, context):
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
@@ -115,6 +113,9 @@ def vtk_enum_attributes(self, context):
     return [(rf"{attribute}",)*3 for attribute in attributes]
 
 def update_colormap_enum(self, context):
+    obj = context.object
+    if obj is None:
+        return
     mat = context.object.active_material
     color_ramp_node = mat.node_tree.nodes["Color Ramp"]
     cmap = plt.get_cmap(self.vtk_colormaps)
