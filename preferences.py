@@ -47,7 +47,7 @@ class VtkImporterPreferences(bpy.types.AddonPreferences):
         layout : bpy.types.UILayout = self.layout
         box = layout.box()
         row = box.row()
-        icon = 'TRIA_DOWN' if self.expand_dependencies else 'TRIA_RIGHT'
+        icon = 'DISCLOSURE_TRI_DOWN' if self.expand_dependencies else 'DISCLOSURE_TRI_RIGHT'
         row.prop(self, "expand_dependencies", text="", icon=icon, emboss=False, icon_only=True)
 
         column = row.column()
@@ -55,8 +55,15 @@ class VtkImporterPreferences(bpy.types.AddonPreferences):
 
         if self.expand_dependencies:
             for dependency, dep_dict in dependencies.items():
-                row = box.row()
-                row.label(text=f"{dependency}: {dep_dict['version']}")
+                row = box.row().split(factor=0.5)
+                split = row.split(factor=0.5)
+                split.label(text=dependency)
+
+                split.label(text=f"v{dep_dict['version']}")
+
+                if "url" in dep_dict:
+                    row.operator(operator="wm.url_open", text=dep_dict["url"].split("//")[-1], icon="URL").url = dep_dict["url"]
+
             box.operator(operator="vtk.upgrade_dependencies", text="Upgrade dependencies",
                          icon_value=0, emboss=True, depress=False)
 

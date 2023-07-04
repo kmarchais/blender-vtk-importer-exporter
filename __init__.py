@@ -6,7 +6,9 @@ def install_dependencies():
         if dependency != 'pip':
             subprocess.call([sys.executable, "-m", "pip", "install", *dependencies])
 
-dependencies = {'pip': {}, 'pyvista': {}, 'cmcrameri': {}}
+dependencies = {'pip': {},
+                'pyvista': {"url": "https://github.com/pyvista/pyvista"},
+                'cmcrameri': {"url": "https://www.fabiocrameri.ch/colourmaps/"}}
 install_dependencies()
 
 from . import preferences, material_panel
