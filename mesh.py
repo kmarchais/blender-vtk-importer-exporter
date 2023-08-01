@@ -3,8 +3,9 @@ import numpy as np
 import pyvista as pv
 from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
 from .attributes import initialize_material_attributes
+from .material_panel import update_attributes_enum
 
-def create_mesh(data_object, mesh_name):
+def create_mesh(context, data_object, mesh_name):
     edges = []
     faces = []
 
@@ -14,11 +15,12 @@ def create_mesh(data_object, mesh_name):
         faces = np.reshape(data_object.faces, (data_object.n_faces, 4))[:, 1:]
 
     if isinstance(data_object, pv.UnstructuredGrid):
+        faces = []
         for cell_type, cells in data_object.cells_dict.items():
             if cell_type == pv.CellType.LINE.value:
                 edges = cells
-            elif cell_type == pv.CellType.TRIANGLE.value:
-                faces = cells
+            elif pv.CellType.TRIANGLE.value <= cell_type <= pv.CellType.QUAD.value:
+                faces += cells
             else:
                 print(f"Unsupported cell type: {cell_type} yet.")
 
@@ -29,6 +31,7 @@ def create_mesh(data_object, mesh_name):
     obj = bpy.data.objects.new(mesh_name, mesh)
     obj["data_range"] = {}
     bpy.context.scene.collection.objects.link(obj)
+    bpy.context.view_layer.objects.active = obj
 
     if len(data_object.point_data.keys()) or len(data_object.cell_data.keys()):
         mat = bpy.data.materials.new(name=f"{mesh_name}_attributes")
@@ -41,6 +44,7 @@ def create_mesh(data_object, mesh_name):
             initialize_material_attributes(attr_name, values, mesh, mat, 'FACE')
 
         create_attribute_material_nodes(mesh_name)
+        update_attributes_enum(mat, context)
 
     if len(faces) == 0 and len(edges) == 0 and "radius" in data_object.point_data.keys():
         convert_mesh_to_pointcloud(mesh_name)

@@ -61,9 +61,9 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
 
             if isinstance(data, pv.MultiBlock):
                 for block_name in data.keys():
-                    create_mesh(data[block_name], f"{mesh_name} : {block_name}")
+                    create_mesh(context, data[block_name], f"{mesh_name} : {block_name}")
             else:
-                create_mesh(data, mesh_name)
+                create_mesh(context, data, mesh_name)
 
         max_frame = 0
         for file in files:

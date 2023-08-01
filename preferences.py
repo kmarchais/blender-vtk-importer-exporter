@@ -62,13 +62,20 @@ class VtkImporterPreferences(bpy.types.AddonPreferences):
                 split.label(text=f"v{dep_dict['version']}")
 
                 if "url" in dep_dict:
-                    row.operator(operator="wm.url_open", text=dep_dict["url"].split("//")[-1], icon="URL").url = dep_dict["url"]
+                    row.operator(
+                        operator="wm.url_open",
+                        text=dep_dict["url"].split("//")[-1],
+                        icon="URL"
+                    ).url = dep_dict["url"]
 
             box.operator(operator="vtk.upgrade_dependencies", text="Upgrade dependencies",
                          icon_value=0, emboss=True, depress=False)
 
         box = layout.box()
         box.prop(context.scene, "default_colormap", icon_value=0, emboss=True)
+        row = box.row()
+        row.label(text="Color map discretization")
+        row.prop(context.scene, "number_elem_cmap", text="")
 
 def register():
     colormaps = get_availbale_colormaps()
@@ -78,7 +85,14 @@ def register():
         name='Default Colormap',
         description='Select the default colormap',
         items=vtk_enum_colormaps,
-        default=default_cmap_index
+        default=default_cmap_index,
+    )
+    bpy.types.Scene.number_elem_cmap = bpy.props.IntProperty(
+        name='Color map discretization',
+        description='Number of color map elements',
+        default=9,
+        min=2,
+        max=32,
     )
     bpy.utils.register_class(VTK_OT_Upgrade_Dependencies)
     bpy.utils.register_class(VtkImporterPreferences)
@@ -86,5 +100,6 @@ def register():
 
 def unregister():
     del bpy.types.Scene.default_colormap
+    del bpy.types.Scene.number_elem_cmap
     bpy.utils.unregister_class(VTK_OT_Upgrade_Dependencies)
     bpy.utils.unregister_class(VtkImporterPreferences)

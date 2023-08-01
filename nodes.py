@@ -8,21 +8,33 @@ def create_attribute_material_nodes(mesh_name):
     bsdf = mat.node_tree.nodes["Principled BSDF"]
     material_output_node = mat.node_tree.nodes["Material Output"]
 
-    
+
     key = list(mat["attributes"].to_dict().keys())[0]
 
     attribute_node = mat.node_tree.nodes.new("ShaderNodeAttribute")
     attribute_node.attribute_name = key
+
+    length_node = mat.node_tree.nodes.new("ShaderNodeVectorMath")
+    length_node.operation = "LENGTH"
+    mat.node_tree.links.new(
+        attribute_node.outputs["Vector"],
+        length_node.inputs["Vector"]
+    )
+
+    separate_node = mat.node_tree.nodes.new("ShaderNodeSeparateXYZ")
+    mat.node_tree.links.new(
+        attribute_node.outputs["Vector"],
+        separate_node.inputs["Vector"]
+    )
 
     map_range_node = mat.node_tree.nodes.new("ShaderNodeMapRange")
     map_range_node.label = "Data range"
     map_range_node.inputs["From Min"].default_value = mat["attributes"][key]["global_min"]
     map_range_node.inputs["From Max"].default_value = mat["attributes"][key]["global_max"]
 
-
     colormap = bpy.context.scene.default_colormap
     mat.vtk_colormaps = colormap
-    n_colors = 32
+    n_colors = bpy.context.scene.number_elem_cmap
     color_ramp_node = mat.node_tree.nodes.new("ShaderNodeValToRGB")
     cmap = plt.get_cmap(colormap)
     color_ramp_node.color_ramp.elements.remove(color_ramp_node.color_ramp.elements[-1]) # remove to create it again in the last iteration to have it selected
@@ -40,14 +52,21 @@ def create_attribute_material_nodes(mesh_name):
     bsdf.select = False
 
     attribute_node.select = False
+    length_node.select = False
+    separate_node.select = False
     map_range_node.select = False
 
     map_range_node.location = (color_ramp_node.location.x - map_range_node.width - 50,
                                     bsdf.location.y)
-    attribute_node.location = (map_range_node.location.x - attribute_node.width - 50,
-                                    bsdf.location.y)
 
-    mat.node_tree.links.new(attribute_node.outputs["Fac"], map_range_node.inputs["Value"])
+    length_node.location = (map_range_node.location.x - length_node.width - 50,
+                                    bsdf.location.y - 150)
+
+    separate_node.location = (map_range_node.location.x - separate_node.width - 50,
+                                    bsdf.location.y - 300)
+
+    attribute_node.location = (length_node.location.x - attribute_node.width - 50,
+                                    bsdf.location.y)
 
     mat.node_tree.links.new(map_range_node.outputs["Result"], color_ramp_node.inputs["Fac"])
     mat.node_tree.links.new(color_ramp_node.outputs["Color"], bsdf.inputs["Base Color"])
