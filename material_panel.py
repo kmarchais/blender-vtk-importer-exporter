@@ -10,7 +10,7 @@ def update_data_range(context, frame_range: Literal["global", "current_frame"]):
     vtk_attribute = mat.vtk_attributes
     if vtk_attribute in mat["attributes"]:
         map_range_node = mat.node_tree.nodes["Map Range"]
-        
+
         obj = context.object
         mesh = obj.data
         attr_type = mesh.attributes[mat.vtk_attributes].data.data.data_type

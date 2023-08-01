@@ -9,10 +9,10 @@ def create_attribute_material_nodes(mesh_name):
     material_output_node = mat.node_tree.nodes["Material Output"]
 
 
-    key = list(mat["attributes"].to_dict().keys())[0]
+    attr_name = list(mat["attributes"].to_dict().keys())[0]
 
     attribute_node = mat.node_tree.nodes.new("ShaderNodeAttribute")
-    attribute_node.attribute_name = key
+    attribute_node.attribute_name = attr_name
 
     length_node = mat.node_tree.nodes.new("ShaderNodeVectorMath")
     length_node.operation = "LENGTH"
@@ -29,9 +29,7 @@ def create_attribute_material_nodes(mesh_name):
 
     map_range_node = mat.node_tree.nodes.new("ShaderNodeMapRange")
     map_range_node.label = "Data range"
-    map_range_node.inputs["From Min"].default_value = mat["attributes"][key]["global_min"]
-    map_range_node.inputs["From Max"].default_value = mat["attributes"][key]["global_max"]
-
+    
     colormap = bpy.context.scene.default_colormap
     mat.vtk_colormaps = colormap
     n_colors = bpy.context.scene.number_elem_cmap
@@ -73,6 +71,15 @@ def create_attribute_material_nodes(mesh_name):
     mat.node_tree.links.new(bsdf.outputs["BSDF"], material_output_node.inputs["Surface"])
 
     bpy.data.objects[mesh_name].data.materials.append(mat)
+
+    if "global_min" in mat["attributes"][attr_name].to_dict().keys():
+        map_range_node.inputs["From Min"].default_value = mat["attributes"][attr_name]["global_min"]
+        map_range_node.inputs["From Max"].default_value = mat["attributes"][attr_name]["global_max"]
+    else:
+        component = mat.vtk_attribute_component
+        attr_stats = mat["attributes"][attr_name][component]
+        map_range_node.inputs["From Min"].default_value = attr_stats["global_min"]
+        map_range_node.inputs["From Max"].default_value = attr_stats["global_max"]
 
 
 def convert_mesh_to_pointcloud(mesh_name):
