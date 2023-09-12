@@ -1,7 +1,6 @@
 import os
 
 import bpy
-from bpy.app.handlers import persistent
 
 import numpy as np
 import pyvista as pv
@@ -91,18 +90,17 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
             else:
                 print(f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}")
 
-            if material.vtk_attribute_component == 'Magnitude':
-                magnitude = np.linalg.norm(attr_values, axis=1)
-                frame_min = np.min(magnitude).item()
-                frame_max = np.max(magnitude).item()
-            elif material.vtk_attribute_component in ['X', 'Y', 'Z']:
-                component = material.vtk_attribute_component
-                index = ['X', 'Y', 'Z'].index(component)
-                frame_min = np.min(attr_values[:, index]).item()
-                frame_max = np.max(attr_values[:, index]).item()
+            component = "Magnitude"
+            if component == 'Magnitude':
+                array = np.linalg.norm(attr_values, axis=1)
+            # elif component in ['X', 'Y', 'Z']:
+            #     index = ['X', 'Y', 'Z'].index(component)
+            #     array = attr_values[:, index]
+            frame_min = np.min(array).item()
+            frame_max = np.max(array).item()
 
         mesh.attributes.new(attr_name, type=value_type, domain=domain)
-        
+
         if value_type == 'FLOAT':
             material["attributes"][attr_name] = {
                 "current_frame_min": frame_min,
@@ -110,9 +108,10 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
                 "global_min": frame_min,
                 "global_max": frame_max
             }
-        elif value_type in ['FLOAT_VECTOR', 'FLOAT2']:
+        elif value_type in {'FLOAT_VECTOR', 'FLOAT2'}:
             material["attributes"][attr_name] = {}
-            material["attributes"][attr_name][material.vtk_attribute_component] = {
+            component = "Magnitude"
+            material["attributes"][attr_name][component] = {
                 "current_frame_min": frame_min,
                 "current_frame_max": frame_max,
                 "global_min": frame_min,
@@ -125,11 +124,11 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
 
         global_min = material["attributes"][attr_name]["global_min"]
         global_max = material["attributes"][attr_name]["global_max"]
-        print(f"attribute : {attr_name}\t\
-                min : {frame_min}\t\
-                max : {frame_max}\t\
-                global_min : {global_min}\t\
-                global_max : {global_max}")
+        # print(f"attribute : {attr_name}\t\
+        #         min : {frame_min}\t\
+        #         max : {frame_max}\t\
+        #         global_min : {global_min}\t\
+        #         global_max : {global_max}")
         material["attributes"][attr_name]["current_frame_min"] = frame_min
         material["attributes"][attr_name]["current_frame_max"] = frame_max
         material["attributes"][attr_name]["global_min"] = min(frame_min, global_min)
@@ -137,19 +136,20 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
     elif len(attr_values.shape) == 2:
         if attr_values.shape[1] in [2, 3]:
             attr_type = 'vector'
-            mesh.attributes[attr_name].data.foreach_set(attr_type, attr_values)
+            mesh.attributes[attr_name].data.foreach_set(attr_type, attr_values.flatten())
 
-            global_min = material["attributes"][attr_name][material.vtk_attribute_component]["global_min"]
-            global_max = material["attributes"][attr_name][material.vtk_attribute_component]["global_max"]
-            print(f"attribute : {attr_name}\t\
-                    min : {frame_min}\t\
-                    max : {frame_max}\t\
-                    global_min : {global_min}\t\
-                    global_max : {global_max}")
-            material["attributes"][attr_name][material.vtk_attribute_component]["current_frame_min"] = frame_min
-            material["attributes"][attr_name][material.vtk_attribute_component]["current_frame_max"] = frame_max
-            material["attributes"][attr_name][material.vtk_attribute_component]["global_min"] = min(frame_min, global_min)
-            material["attributes"][attr_name][material.vtk_attribute_component]["global_max"] = max(frame_max, global_max)
+            component = "Magnitude"
+            global_min = material["attributes"][attr_name][component]["global_min"]
+            global_max = material["attributes"][attr_name][component]["global_max"]
+            # print(f"attribute : {attr_name}\t\
+            #         min : {frame_min}\t\
+            #         max : {frame_max}\t\
+            #         global_min : {global_min}\t\
+            #         global_max : {global_max}")
+            material["attributes"][attr_name][component]["current_frame_min"] = frame_min
+            material["attributes"][attr_name][component]["current_frame_max"] = frame_max
+            material["attributes"][attr_name][component]["global_min"] = min(frame_min, global_min)
+            material["attributes"][attr_name][component]["global_max"] = max(frame_max, global_max)
         # elif attr_values.shape[1] == 4:
         #     attr_type = 'color'
         else:
@@ -158,20 +158,19 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
         print(f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}")
 
 
-@persistent
 def update_attributes_from_vtk(scene):
     if "vtk_files" not in bpy.context.scene and "vtk_directory" not in bpy.context.scene:
         return
 
     frame = scene.frame_current
-    print(f"\nframe : {frame}")
+    # print(f"\nframe : {frame}")
 
     files = bpy.context.scene["vtk_files"]
     directory = bpy.context.scene["vtk_directory"]
 
     for file in files:
         mesh_name = file[0].split(".")[0].split("-")[0]
-        print(f"\nmesh : {mesh_name}")
+        # print(f"\nmesh : {mesh_name}")
 
         if len(file) > 1:
             polydata = pv.read(f"{directory}/{file[frame]}")
@@ -188,4 +187,4 @@ def update_attributes_from_vtk(scene):
 
             mesh.update()
 
-    print("-" * os.get_terminal_size().columns)
+    # print("-" * os.get_terminal_size().columns)

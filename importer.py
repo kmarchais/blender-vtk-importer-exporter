@@ -6,7 +6,7 @@ import bpy
 
 import pyvista as pv
 
-from .mesh import create_mesh
+from .mesh import create_object
 
 def sort_files(file_list):
     sorted_file_list = []
@@ -56,14 +56,19 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         bpy.context.scene["mesh_attributes"] = {}
 
         for file in files:
-            data = pv.read(f"{directory}/{file[0]}")
+            file_path = f"{directory}/{file[0]}"
+            vtk_data = pv.read(file_path)
             mesh_name = file[0].split('.')[0].split('-')[0]
 
-            if isinstance(data, pv.MultiBlock):
-                for block_name in data.keys():
-                    create_mesh(context, data[block_name], f"{mesh_name} : {block_name}")
+            if isinstance(vtk_data, pv.MultiBlock):
+                for block_name in vtk_data.keys():
+                    name = f"{mesh_name} : {block_name}"
+                    obj = create_object(context, vtk_data[block_name], name)
+                    obj["vtk_file_path"] = file_path
+                    obj["vtk_block_name"] = block_name
             else:
-                create_mesh(context, data, mesh_name)
+                obj = create_object(context, vtk_data, mesh_name)
+                obj["vtk_file_path"] = file_path
 
         max_frame = 0
         for file in files:
