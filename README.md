@@ -1,5 +1,6 @@
 # blender-vtk-importer
 - Import VTK files (VTK, VTU, VTP, VTM)
+- Export mesh and attributes to VTK file
 - Store data as attributes
 - Import sequence of files 
 
@@ -13,7 +14,7 @@
 - Download the ZIP file from this repository
 - In Blender, `Edit > Preferences > Add-ons > Install...` find the zip file that you just downloaded and click `Install Add-on`
 - Enable the add-on by clicking the checkbox (this will install the required python dependencies)
-- You are ready to import VTK files in `File > Import > VTK`
+- You are ready to import or export VTK files in `File > Import > VTK` or `File > Export > VTK`
 
 # A few things to know
 - Several files can be imported at the same time by selecting them all
