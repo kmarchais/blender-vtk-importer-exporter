@@ -2,7 +2,8 @@
 - Import VTK files (VTK, VTU, VTP, VTM)
 - Export mesh and attributes to VTK file
 - Store data as attributes
-- Import sequence of files 
+- Import sequence of files
+- Basic filters 
 
 <p align="center">
   <img src="images/tpms.gif" width="49%"/>
@@ -27,3 +28,7 @@
 # TODO
 - Color legend
 - Mesh Edges
+
+# Useful addons
+- For more complex post-processing, consider using [BVtkNodes](https://github.com/tkeskita/BVtkNodes)
+- To quickly import a colormap as a color ramp in the shading nodes editor, use this great add-on: [Blender-Colormaps](https://github.com/TheJeran/Blender-Colormaps)
