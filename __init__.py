@@ -15,7 +15,7 @@ from bpy.app.handlers import persistent
 
 from . import preferences, material_panel
 from .importer import ImportVTK
-from .exporter import ExportVTK
+from .exporter import ExportVTK, ExportCSV
 from .attributes import update_attributes_from_vtk
 from .view3d_panel.filters_panel import update_filters
 from . import view3d_panel
@@ -38,6 +38,7 @@ def menu_func_import(self, context):
 
 def menu_func_export(self, context):
     self.layout.operator(ExportVTK.bl_idname, text="VTK (.vtk)")
+    self.layout.operator(ExportCSV.bl_idname, text="CSV (.csv)")
 
 @persistent
 def update_frame(scene):
@@ -47,6 +48,7 @@ def update_frame(scene):
 def register():
     bpy.utils.register_class(ImportVTK)
     bpy.utils.register_class(ExportVTK)
+    bpy.utils.register_class(ExportCSV)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
     material_panel.register()
@@ -60,6 +62,7 @@ def unregister():
     bpy.utils.unregister_class(ImportVTK)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.utils.unregister_class(ExportVTK)
+    bpy.utils.unregister_class(ExportCSV)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
     preferences.unregister()
     material_panel.unregister()
