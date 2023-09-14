@@ -67,7 +67,7 @@ class ExportVTK(bpy.types.Operator, ExportHelper):
 class ExportCSV(bpy.types.Operator, ExportHelper):
     """Export mesh attributes to a CSV file"""
     bl_idname = "export.csv"
-    bl_label = "Export attrivutes CSV"
+    bl_label = "Export CSV"
 
     filename_ext = ".csv"
     filter_glob: bpy.props.StringProperty(
