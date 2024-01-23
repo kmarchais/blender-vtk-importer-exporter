@@ -9,6 +9,7 @@ from .material_panel import update_attributes_enum
 
 VTK_data = Union[pv.PolyData, pv.UnstructuredGrid]
 
+
 def get_mesh_data_from_vtk(vtk_data: VTK_data):
     edges = []
     faces = []
@@ -16,7 +17,7 @@ def get_mesh_data_from_vtk(vtk_data: VTK_data):
     if isinstance(vtk_data, pv.PolyData):
         if not vtk_data.is_all_triangles:
             vtk_data = vtk_data.triangulate()
-        faces = np.reshape(vtk_data.faces, (vtk_data.n_faces, 4))[:, 1:]
+        faces = np.reshape(vtk_data.faces, (vtk_data.n_cells, 4))[:, 1:]
 
     if isinstance(vtk_data, pv.UnstructuredGrid):
         faces = []
@@ -30,7 +31,10 @@ def get_mesh_data_from_vtk(vtk_data: VTK_data):
 
     return vtk_data.points, edges, faces
 
-def update_mesh_from_vtk(mesh: bpy.types.Mesh, vtk_data: VTK_data, update_attributes: bool = True):
+
+def update_mesh_from_vtk(
+    mesh: bpy.types.Mesh, vtk_data: VTK_data, update_attributes: bool = True
+):
     vertices, edges, faces = get_mesh_data_from_vtk(vtk_data)
 
     mesh.clear_geometry()
@@ -38,6 +42,7 @@ def update_mesh_from_vtk(mesh: bpy.types.Mesh, vtk_data: VTK_data, update_attrib
 
     if update_attributes:
         set_mesh_attributes(mesh, vtk_data)
+
 
 def vtk_to_mesh(vtk_data, mesh_name):
     vertices, edges, faces = get_mesh_data_from_vtk(vtk_data)
@@ -48,6 +53,7 @@ def vtk_to_mesh(vtk_data, mesh_name):
 
     return mesh
 
+
 def set_mesh_attributes(mesh, vtk_data):
     # create mesh attributes
     pass
@@ -57,6 +63,7 @@ def set_mesh_attributes(mesh, vtk_data):
 
     # for attr_name, values in data_object.cell_data.items():
     #     initialize_material_attributes(attr_name, values, mesh, mesh.materials[0], 'FACE')
+
 
 def create_object(context, vtk_data, mesh_name) -> bpy.types.Object:
     # convert vtk mesh to blender mesh
@@ -79,15 +86,17 @@ def create_object(context, vtk_data, mesh_name) -> bpy.types.Object:
         mat["attributes"] = {}
 
         for attr_name, values in vtk_data.point_data.items():
-            initialize_material_attributes(attr_name, values, mesh, mat, 'POINT')
+            initialize_material_attributes(attr_name, values, mesh, mat, "POINT")
 
         for attr_name, values in vtk_data.cell_data.items():
-            initialize_material_attributes(attr_name, values, mesh, mat, 'FACE')
+            initialize_material_attributes(attr_name, values, mesh, mat, "FACE")
 
         create_attribute_material_nodes(mesh_name)
         update_attributes_enum(mat, context)
 
-    is_point_cloud = len(mesh.polygons) + len(mesh.edges) == 0 and "radius" in vtk_data.point_data
+    is_point_cloud = (
+        len(mesh.polygons) + len(mesh.edges) == 0 and "rad" in vtk_data.point_data
+    )
     if is_point_cloud:
         convert_mesh_to_pointcloud(mesh_name)
 
