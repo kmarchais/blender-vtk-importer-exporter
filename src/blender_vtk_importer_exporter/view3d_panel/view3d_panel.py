@@ -1,5 +1,6 @@
 import bpy
 
+
 class View3D_VTK_Panel:
     bl_idname = "VIEW3D_PT_VTK"
     bl_label = "VTK"
