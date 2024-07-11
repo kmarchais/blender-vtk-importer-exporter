@@ -11,5 +11,5 @@ def test_sort_files() -> None:
         Path("file-1.vtk"),
         Path("file-4.vtk"),
     ]
-    sorted_files = sort_files(files)
+    sorted_files = sort_files(files, frame_sep="-")
     assert sorted_files[0] == [file.name for file in sorted(files)]
