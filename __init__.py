@@ -1,24 +1,30 @@
-dependencies = {'pip': {},
-                'pyvista': {"url": "https://github.com/pyvista/pyvista"},
-                'cmcrameri': {"url": "https://www.fabiocrameri.ch/colourmaps/"}}
+"""Blender VTK addon to import/export VTK files."""
+
+dependencies = {
+    "pip": {},
+    "pyvista": {"url": "https://github.com/pyvista/pyvista"},
+    "cmcrameri": {"url": "https://www.fabiocrameri.ch/colourmaps/"},
+}
 
 for dependency in dependencies:
-    if dependency != 'pip':
+    if dependency != "pip":
         try:
             __import__(dependency)
         except ImportError:
-            import sys, subprocess
+            import subprocess
+            import sys
+
             subprocess.call([sys.executable, "-m", "pip", "install", dependency])
 
 import bpy
 from bpy.app.handlers import persistent
 
-from . import preferences, material_panel
-from .importer import ImportVTK
-from .exporter import ExportVTK, ExportCSV
+from . import material_panel, preferences, view3d_panel
 from .attributes import update_attributes_from_vtk
+from .exporter import ExportCSV, ExportVTK
+from .importer import ImportVTK
+from .mesh import update_mesh_frame
 from .view3d_panel.filters_panel import update_filters
-from . import view3d_panel
 
 bl_info = {
     "name": "VTK import/Export",
@@ -32,20 +38,34 @@ bl_info = {
     "category": "Import-Export",
 }
 
-def menu_func_import(self, context):
+
+def menu_func_import(
+    self: bpy.types.TOPBAR_MT_file_import,
+    _: bpy.types.Context,
+) -> None:
+    """Add the import menu item."""
     self.layout.operator(ImportVTK.bl_idname, text="VTK (.vtk, .vtu, .vtp, .vtm)")
 
 
-def menu_func_export(self, context):
+def menu_func_export(
+    self: bpy.types.TOPBAR_MT_file_export,
+    _: bpy.types.Context,
+) -> None:
+    """Add the export menu item."""
     self.layout.operator(ExportVTK.bl_idname, text="VTK (.vtk)")
     self.layout.operator(ExportCSV.bl_idname, text="CSV (.csv)")
 
+
 @persistent
-def update_frame(scene):
-    update_attributes_from_vtk(scene)
+def update_frame(scene: bpy.types.Scene) -> None:
+    """Update the frame."""
+    update_mesh_frame(scene)
+    # update_attributes_from_vtk(scene)
     update_filters(scene)
 
-def register():
+
+def register() -> None:
+    """Register the addon."""
     bpy.utils.register_class(ImportVTK)
     bpy.utils.register_class(ExportVTK)
     bpy.utils.register_class(ExportCSV)
@@ -58,7 +78,9 @@ def register():
     bpy.types.WindowManager.on_frame_change = update_frame
     bpy.app.handlers.frame_change_post.append(bpy.types.WindowManager.on_frame_change)
 
-def unregister():
+
+def unregister() -> None:
+    """Unregister the addon."""
     bpy.utils.unregister_class(ImportVTK)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.utils.unregister_class(ExportVTK)
