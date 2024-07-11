@@ -7,10 +7,10 @@
 - Basic filters
 
 <p align="center">
-  <img src="images/tpms.gif" width="49%"/>
-  <img src="images/material_properties.png" width="49%">
+  <img src="images/tpms.gif" width="49%" alt="Particle flow simulation through a gyroid"/>
+  <img src="images/material_properties.png" width="49%" alt="Material panel to customize visualization">
 </p>
-<img src="images/viridis.png">
+<img src="images/viridis.png" alt="Point cloud visualization of particles">
 
 ## Installation
 

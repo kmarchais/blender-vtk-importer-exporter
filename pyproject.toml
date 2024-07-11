@@ -1,0 +1,31 @@
+[project]
+name = "blender-vtk-importer-exporter"
+version = "0.1.0"
+description = "Blender Addon VTK import/export"
+authors = [{ name = "Kevin Marchais", email = "kevinmarchais@gmail.com" }]
+dependencies = ["pyvista>=0.44.0", "numpy<2", "cmcrameri>=1.9"]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = [
+    "bpy>=3.0.0",
+    "blender-stubs>=3.12.27",
+    "ruff>=0.5.1",
+    "pip>=24.1.2",
+    "pytest>=8.2.2",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/blender_vtk_importer_exporter"]
+
+[tool.ruff.lint]
+select = ["ALL"]

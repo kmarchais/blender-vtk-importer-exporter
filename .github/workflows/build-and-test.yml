@@ -1,0 +1,36 @@
+name: Build and Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - "*"
+
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ["ubuntu-latest", "macos-13"]
+        python-version: ["3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: eifinger/setup-rye@v4
+        with:
+          version: "latest"
+
+      - if: runner.os == 'Linux'
+        run: sudo apt-get install libglu1-mesa
+
+      - name: Install
+        run: rye sync
+
+      - name: Test
+        run: rye test

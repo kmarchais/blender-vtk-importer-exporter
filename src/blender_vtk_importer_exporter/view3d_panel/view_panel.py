@@ -1,8 +1,9 @@
-import bpy
-
 import math
 
+import bpy
+
 from .view3d_panel import View3D_VTK_Panel
+
 
 class VTK_OT_View_Isometric(bpy.types.Operator):
     bl_idname = "vtk.view_isometric"
@@ -10,13 +11,14 @@ class VTK_OT_View_Isometric(bpy.types.Operator):
     bl_description = "Set isometric view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='RIGHT')
+        bpy.ops.view3d.view_axis(type="RIGHT")
         angle = math.radians(45)
-        bpy.ops.view3d.view_orbit(angle=angle, type='ORBITRIGHT')
+        bpy.ops.view3d.view_orbit(angle=angle, type="ORBITRIGHT")
         # something weird with orbit up and down
-        bpy.ops.view3d.view_orbit(angle=angle, type='ORBITUP')
+        bpy.ops.view3d.view_orbit(angle=angle, type="ORBITUP")
 
-        return {'FINISHED'}
+        return {"FINISHED"}
+
 
 class VTK_OT_View_XY(bpy.types.Operator):
     bl_idname = "vtk.view_xy"
@@ -24,8 +26,9 @@ class VTK_OT_View_XY(bpy.types.Operator):
     bl_description = "Set XY view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='TOP')
-        return {'FINISHED'}
+        bpy.ops.view3d.view_axis(type="TOP")
+        return {"FINISHED"}
+
 
 class VTK_OT_View_XZ(bpy.types.Operator):
     bl_idname = "vtk.view_xz"
@@ -33,8 +36,9 @@ class VTK_OT_View_XZ(bpy.types.Operator):
     bl_description = "Set XZ view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='BACK')
-        return {'FINISHED'}
+        bpy.ops.view3d.view_axis(type="BACK")
+        return {"FINISHED"}
+
 
 class VTK_OT_View_YX(bpy.types.Operator):
     bl_idname = "vtk.view_yx"
@@ -42,8 +46,9 @@ class VTK_OT_View_YX(bpy.types.Operator):
     bl_description = "Set YX view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='BOTTOM')
-        return {'FINISHED'}
+        bpy.ops.view3d.view_axis(type="BOTTOM")
+        return {"FINISHED"}
+
 
 class VTK_OT_View_YZ(bpy.types.Operator):
     bl_idname = "vtk.view_yz"
@@ -51,8 +56,9 @@ class VTK_OT_View_YZ(bpy.types.Operator):
     bl_description = "Set YZ view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='RIGHT')
-        return {'FINISHED'}
+        bpy.ops.view3d.view_axis(type="RIGHT")
+        return {"FINISHED"}
+
 
 class VTK_OT_View_ZX(bpy.types.Operator):
     bl_idname = "vtk.view_zx"
@@ -60,8 +66,9 @@ class VTK_OT_View_ZX(bpy.types.Operator):
     bl_description = "Set ZX view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='FRONT')
-        return {'FINISHED'}
+        bpy.ops.view3d.view_axis(type="FRONT")
+        return {"FINISHED"}
+
 
 class VTK_OT_View_ZY(bpy.types.Operator):
     bl_idname = "vtk.view_zy"
@@ -69,8 +76,9 @@ class VTK_OT_View_ZY(bpy.types.Operator):
     bl_description = "Set ZY view"
 
     def execute(self, context):
-        bpy.ops.view3d.view_axis(type='LEFT')
-        return {'FINISHED'}
+        bpy.ops.view3d.view_axis(type="LEFT")
+        return {"FINISHED"}
+
 
 class VTK_OT_Rotate_90(bpy.types.Operator):
     bl_idname = "vtk.rotate_90"
@@ -79,7 +87,8 @@ class VTK_OT_Rotate_90(bpy.types.Operator):
 
     def execute(self, context):
         bpy.ops.view3d.view_roll(angle=math.radians(90))
-        return {'FINISHED'}
+        return {"FINISHED"}
+
 
 class VTK_OT_Rotate_90_Inv(bpy.types.Operator):
     bl_idname = "vtk.rotate_90_inv"
@@ -88,7 +97,7 @@ class VTK_OT_Rotate_90_Inv(bpy.types.Operator):
 
     def execute(self, context):
         bpy.ops.view3d.view_roll(angle=math.radians(-90))
-        return {'FINISHED'}
+        return {"FINISHED"}
 
 
 class VIEW3D_PT_VTK_view(View3D_VTK_Panel, bpy.types.Panel):
@@ -109,6 +118,7 @@ class VIEW3D_PT_VTK_view(View3D_VTK_Panel, bpy.types.Panel):
         row.operator("vtk.rotate_90", text="+90°")
         row.operator("vtk.rotate_90_inv", text="-90*")
 
+
 def register():
     bpy.utils.register_class(VIEW3D_PT_VTK_view)
     bpy.utils.register_class(VTK_OT_View_Isometric)
@@ -120,6 +130,7 @@ def register():
     bpy.utils.register_class(VTK_OT_View_ZY)
     bpy.utils.register_class(VTK_OT_Rotate_90)
     bpy.utils.register_class(VTK_OT_Rotate_90_Inv)
+
 
 def unregister():
     bpy.utils.unregister_class(VIEW3D_PT_VTK_view)

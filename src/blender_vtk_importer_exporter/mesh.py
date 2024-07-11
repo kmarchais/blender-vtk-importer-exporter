@@ -3,9 +3,10 @@ from typing import Union
 import bpy
 import numpy as np
 import pyvista as pv
-from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
+
 from .attributes import initialize_material_attributes
 from .material_panel import update_attributes_enum
+from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
 
 VTK_data = Union[pv.PolyData, pv.UnstructuredGrid]
 

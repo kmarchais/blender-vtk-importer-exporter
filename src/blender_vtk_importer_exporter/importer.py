@@ -1,18 +1,18 @@
 import os
 
-from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty
 import bpy
-
 import pyvista as pv
+from bpy.props import StringProperty
+from bpy_extras.io_utils import ImportHelper
 
 from .mesh import create_object
+
 
 def sort_files(file_list):
     sorted_file_list = []
     patterns = []
     for file in file_list:
-        pattern = file.name.split('.')[0].split('-')[0]
+        pattern = file.name.split(".")[0].split("-")[0]
         if pattern not in patterns:
             patterns.append(pattern)
             sorted_file_list.append([file.name])
@@ -22,8 +22,7 @@ def sort_files(file_list):
     for i, sequence in enumerate(sorted_file_list):
         if len(sequence) > 1:
             sorted_file_list[i] = sorted(
-                sequence,
-                key=lambda x: int(x.split('.')[0].split('-')[-1])
+                sequence, key=lambda x: int(x.split(".")[0].split("-")[-1])
             )
 
     return sorted_file_list
@@ -31,18 +30,20 @@ def sort_files(file_list):
 
 class ImportVTK(bpy.types.Operator, ImportHelper):
     """Load a VTK file"""
+
     bl_idname = "import.vtk"
     bl_label = "Import VTK"
 
     filename_ext = ".vtk"
     filter_glob: StringProperty(
         default="*.vtk;*.vtu;*.vtp;*.vtm",
-        options={'HIDDEN'},
+        options={"HIDDEN"},
         maxlen=255,  # Max internal buffer length, longer would be clamped.
     )
 
-    files: bpy.props.CollectionProperty(type=bpy.types.OperatorFileListElement,
-                                         options={'HIDDEN', 'SKIP_SAVE'})
+    files: bpy.props.CollectionProperty(
+        type=bpy.types.OperatorFileListElement, options={"HIDDEN", "SKIP_SAVE"}
+    )
 
     def execute(self, context):
         # global files, directory
@@ -58,7 +59,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         for file in files:
             file_path = f"{directory}/{file[0]}"
             vtk_data = pv.read(file_path)
-            mesh_name = file[0].split('.')[0].split('-')[0]
+            mesh_name = file[0].split(".")[0].split("-")[0]
 
             if isinstance(vtk_data, pv.MultiBlock):
                 for block_name in vtk_data.keys():
@@ -79,4 +80,4 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
             bpy.context.scene.frame_end = max_frame
             bpy.context.scene.frame_current = 0
 
-        return {'FINISHED'}
+        return {"FINISHED"}

@@ -1,14 +1,22 @@
 import bpy
+import pyvista as pv
 from bpy.types import Context
 from bpy_extras.object_utils import AddObjectHelper, object_data_add
 
-import pyvista as pv
+from blender_vtk_importer_exporter.mesh import (
+    create_object,
+    set_mesh_attributes,
+    vtk_to_mesh,
+)
 
 from .view3d_panel import View3D_VTK_Panel
-from ..mesh import create_object, vtk_to_mesh, set_mesh_attributes
+
 
 def update_filters(scene):
-    if "vtk_files" not in bpy.context.scene and "vtk_directory" not in bpy.context.scene:
+    if (
+        "vtk_files" not in bpy.context.scene
+        and "vtk_directory" not in bpy.context.scene
+    ):
         return
 
     frame = scene.frame_current
@@ -28,7 +36,9 @@ def update_filters(scene):
                         normal = clip_filter["normal"]
                         origin = clip_filter["origin"]
                         invert = clip_filter["invert"]
-                        vtk_data.clip(normal=normal, origin=origin, invert=invert, inplace=True)
+                        vtk_data.clip(
+                            normal=normal, origin=origin, invert=invert, inplace=True
+                        )
 
                         for child in obj.children:
                             if "clip" in child.name:
@@ -69,33 +79,34 @@ def update_filters(scene):
 
 #         return {'FINISHED'}
 
+
 class VTK_OT_Clip(bpy.types.Operator):
     bl_idname = "vtk.clip"
     bl_label = "Clip"
     bl_description = "Clip"
-    bl_options = {'REGISTER', 'UNDO'}
+    bl_options = {"REGISTER", "UNDO"}
 
     obj_name: bpy.props.StringProperty(
-        name='Object Name',
-        description='Object Name',
-        default='',
+        name="Object Name",
+        description="Object Name",
+        default="",
     )
 
     normal: bpy.props.FloatVectorProperty(
-        name='Normal',
-        subtype='XYZ',
-        description='',
+        name="Normal",
+        subtype="XYZ",
+        description="",
         default=(1.0, 0.0, 0.0),
     )
     origin: bpy.props.FloatVectorProperty(
-        name='Origin',
-        subtype='XYZ',
-        description='',
+        name="Origin",
+        subtype="XYZ",
+        description="",
         default=(0.0, 0.0, 0.0),
     )
     invert: bpy.props.BoolProperty(
-        name='Invert',
-        description='',
+        name="Invert",
+        description="",
         default=False,
     )
 
@@ -117,9 +128,11 @@ class VTK_OT_Clip(bpy.types.Operator):
         obj["vtk_filters"]["clip"]["origin"] = self.origin
         obj["vtk_filters"]["clip"]["invert"] = self.invert
 
-        clipped = self.vtk_data.clip(normal=self.normal, origin=self.origin, invert=self.invert)
+        clipped = self.vtk_data.clip(
+            normal=self.normal, origin=self.origin, invert=self.invert
+        )
         if clipped.n_points == 0:
-            return {'FINISHED'}
+            return {"FINISHED"}
 
         clipped_obj = create_object(context, clipped, self.clip_name)
         # context.view_layer.objects.active = obj
@@ -128,7 +141,7 @@ class VTK_OT_Clip(bpy.types.Operator):
 
         # object_data_add(context, bpy.data.meshes[name], operator=self)
 
-        return {'FINISHED'}
+        return {"FINISHED"}
 
     def invoke(self, context, event):
         obj = context.object
@@ -145,13 +158,15 @@ class VTK_OT_Clip(bpy.types.Operator):
     #     layout.prop(self, "origin", text="Origin")
     #     layout.prop(self, "invert", text="Invert")
 
+
 class VTK_OT_Warp(bpy.types.Operator):
     bl_idname = "vtk.warp"
     bl_label = "Warp"
     bl_description = "Warp"
 
     def execute(self, context):
-        return {'FINISHED'}
+        return {"FINISHED"}
+
 
 class VIEW3D_PT_filters(View3D_VTK_Panel, bpy.types.Panel):
     bl_label = "Filters"
@@ -180,6 +195,7 @@ class VIEW3D_PT_filters(View3D_VTK_Panel, bpy.types.Panel):
 
         layout.operator("vtk.warp", text="Warp")
 
+
 def register():
     bpy.utils.register_class(VIEW3D_PT_filters)
     bpy.utils.register_class(VTK_OT_Clip)
@@ -207,6 +223,7 @@ def register():
     #     description='',
     #     default=False,
     # )
+
 
 def unregister():
     # del bpy.types.Object.clip_active
