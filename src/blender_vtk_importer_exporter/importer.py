@@ -7,12 +7,14 @@ from bpy_extras.io_utils import ImportHelper
 
 from .mesh import create_object
 
+FRAME_SEP = "_"
 
-def sort_files(file_list):
+
+def sort_files(file_list, frame_sep=FRAME_SEP):
     sorted_file_list = []
     patterns = []
     for file in file_list:
-        pattern = file.name.split(".")[0].split("-")[0]
+        pattern = file.name.split(".")[0].split(frame_sep)[0]
         if pattern not in patterns:
             patterns.append(pattern)
             sorted_file_list.append([file.name])
@@ -22,7 +24,7 @@ def sort_files(file_list):
     for i, sequence in enumerate(sorted_file_list):
         if len(sequence) > 1:
             sorted_file_list[i] = sorted(
-                sequence, key=lambda x: int(x.split(".")[0].split("-")[-1])
+                sequence, key=lambda x: int(x.split(".")[0].split(frame_sep)[-1])
             )
 
     return sorted_file_list
@@ -55,11 +57,12 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         bpy.context.scene["vtk_files"] = files
         bpy.context.scene["vtk_directory"] = directory
         bpy.context.scene["mesh_attributes"] = {}
+        bpy.context.scene["vtk_frame_sep"] = FRAME_SEP
 
         for file in files:
             file_path = f"{directory}/{file[0]}"
             vtk_data = pv.read(file_path)
-            mesh_name = file[0].split(".")[0].split("-")[0]
+            mesh_name = file[0].split(".")[0].split(FRAME_SEP)[0]
 
             if isinstance(vtk_data, pv.MultiBlock):
                 for block_name in vtk_data.keys():

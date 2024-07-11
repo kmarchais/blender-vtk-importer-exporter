@@ -23,10 +23,11 @@ def update_filters(scene):
 
     files = bpy.context.scene["vtk_files"]
     directory = bpy.context.scene["vtk_directory"]
+    frame_sep = bpy.context.scene["vtk_frame_sep"]
 
     for file in files:
         if len(file) > 1:
-            obj_name = file[0].split(".")[0].split("-")[0]
+            obj_name = file[0].split(".")[0].split(frame_sep)[0]
             obj = bpy.data.objects[obj_name]
             if "vtk_filters" in obj:
                 vtk_data = pv.read(f"{directory}/{file[frame]}")

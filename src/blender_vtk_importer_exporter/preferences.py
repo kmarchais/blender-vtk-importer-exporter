@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 import bpy
+import pip
 
 from blender_vtk_importer_exporter.material_panel import (
     get_availbale_colormaps,
@@ -13,14 +14,14 @@ from blender_vtk_importer_exporter.material_panel import (
 )
 
 COLORMAP = "viridis"
+DEPENDENCIES = importlib.metadata.requires(__package__)
 
 
 def get_dependencies_versions():
     if __package__ is None:
         return
-    dependencies = importlib.metadata.requires(__package__)
     dep_dict = {}
-    for dependency in dependencies:
+    for dependency in DEPENDENCIES:
         name = dependency.split("==")[0].split(">")[0].split("<")[0].split(";")[0]
         dep_dict["module"] = name
         try:
@@ -40,11 +41,13 @@ class VTK_OT_Upgrade_Dependencies(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        for dependency, dep_dict in dependencies.items():
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "--upgrade", dependency]
-            )
-            importlib.reload(dep_dict["module"])
+        if __package__ is None:
+            return {"CANCELLED"}
+        for dependency in DEPENDENCIES:
+            name = dependency.split("==")[0].split(">")[0].split("<")[0].split(";")[0]
+            pip.main(["install", "--upgrade", name])
+            # importlib.reload(name)
+            importlib.import_module(name)
         get_dependencies_versions()
         return {"FINISHED"}
 
@@ -79,19 +82,23 @@ class VtkImporterPreferences(bpy.types.AddonPreferences):
         column.label(text="Dependencies")
 
         if self.expand_dependencies:
-            for dependency, dep_dict in dependencies.items():
+            for dependency in DEPENDENCIES:
+                dep_name = (
+                    dependency.split("==")[0].split(">")[0].split("<")[0].split(";")[0]
+                )
                 row = box.row().split(factor=0.5)
                 split = row.split(factor=0.5)
                 split.label(text=dependency)
 
-                split.label(text=f"v{dep_dict['version']}")
+                version = importlib.metadata.version(dep_name)
+                split.label(text=f"v{version}")
 
-                if "url" in dep_dict:
-                    row.operator(
-                        operator="wm.url_open",
-                        text=dep_dict["url"].split("//")[-1],
-                        icon="URL",
-                    ).url = dep_dict["url"]
+                # if "url" in dep_dict:
+                #     row.operator(
+                #         operator="wm.url_open",
+                #         text=dep_dict["url"].split("//")[-1],
+                #         icon="URL",
+                #     ).url = dep_dict["url"]
 
             box.operator(
                 operator="vtk.upgrade_dependencies",

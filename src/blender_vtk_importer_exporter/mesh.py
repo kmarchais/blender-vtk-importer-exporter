@@ -28,7 +28,8 @@ def get_mesh_data_from_vtk(vtk_data: VTK_data):
             elif pv.CellType.TRIANGLE.value <= cell_type <= pv.CellType.QUAD.value:
                 faces += cells
             else:
-                print(f"Unsupported cell type: {cell_type} yet.")
+                err_msg = f"Unsupported cell type: {cell_type} yet."
+                raise NotImplementedError(err_msg)
 
     return vtk_data.points, edges, faces
 
