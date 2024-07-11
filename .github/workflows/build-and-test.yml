@@ -22,8 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install a specific version
-        uses: eifinger/setup-rye@v4
+      - uses: eifinger/setup-rye@v4
         with:
           version: "latest"
 
