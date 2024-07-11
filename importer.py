@@ -8,11 +8,13 @@ import pyvista as pv
 
 from .mesh import create_object
 
+FRAME_SEP = "_"
+
 def sort_files(file_list):
     sorted_file_list = []
     patterns = []
     for file in file_list:
-        pattern = file.name.split('.')[0].split('-')[0]
+        pattern = file.name.split('.')[0].split(FRAME_SEP)[0]
         if pattern not in patterns:
             patterns.append(pattern)
             sorted_file_list.append([file.name])
@@ -23,7 +25,7 @@ def sort_files(file_list):
         if len(sequence) > 1:
             sorted_file_list[i] = sorted(
                 sequence,
-                key=lambda x: int(x.split('.')[0].split('-')[-1])
+                key=lambda x: int(x.split('.')[0].split(FRAME_SEP)[-1])
             )
 
     return sorted_file_list
@@ -58,7 +60,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         for file in files:
             file_path = f"{directory}/{file[0]}"
             vtk_data = pv.read(file_path)
-            mesh_name = file[0].split('.')[0].split('-')[0]
+            mesh_name = file[0].split('.')[0].split(FRAME_SEP)[0]
 
             if isinstance(vtk_data, pv.MultiBlock):
                 for block_name in vtk_data.keys():
