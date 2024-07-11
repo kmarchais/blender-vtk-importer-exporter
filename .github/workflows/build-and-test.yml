@@ -22,18 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install a specific version
+        uses: eifinger/setup-rye@v4
         with:
-          python-version: ${{ matrix.python-version }}
-          cache: "pip"
+          version: "latest"
 
       - if: runner.os == 'Linux'
         run: sudo apt-get install libglu1-mesa
 
       - name: Install
-        run: |
-          pip install uv
-          uv pip install --system blender-vtk-importer-exporter[dev]@.
+        run: rye sync
 
       - name: Test
-        run: pytest tests
+        run: rye test
