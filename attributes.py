@@ -180,44 +180,15 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
         )
 
 
-def update_attributes_from_vtk(scene):
-    if (
-        "vtk_files" not in bpy.context.scene
-        and "vtk_directory" not in bpy.context.scene
-    ):
-        return
+def update_attributes_from_vtk(polydata: pv.PolyData, mesh_name: str) -> None:
+    mesh = bpy.data.meshes[mesh_name]
+    mesh.attributes["position"].data.foreach_set("vector", np.ravel(polydata.points))
+    mat = bpy.data.materials[f"{mesh_name}_attributes"]
 
-    frame = scene.frame_current
-    # print(f"\nframe : {frame}")
+    for attr_name, values in polydata.point_data.items():
+        update_material_attributes(attr_name, values, mesh, mat, "POINT")
 
-    files = bpy.context.scene["vtk_files"]
-    directory = bpy.context.scene["vtk_directory"]
-    frame_sep = bpy.context.scene["frame_sep"]
+    for attr_name, values in polydata.cell_data.items():
+        update_material_attributes(attr_name, values, mesh, mat, "FACE")
 
-    for file in files:
-        mesh_name = file[0].split(".")[0].split(frame_sep)[0]
-        # print(f"\nmesh : {mesh_name}")
-
-        if len(file) > 1:
-            polydata = pv.read(f"{directory}/{file[frame]}")
-            mesh: bpy.types.Mesh = bpy.data.meshes[mesh_name]
-
-            if polydata.n_points == mesh.vertices:
-                mesh.attributes["position"].data.foreach_set(
-                    "vector", np.ravel(polydata.points)
-                )
-                mat = bpy.data.materials[f"{mesh_name}_attributes"]
-
-                for attr_name, values in polydata.point_data.items():
-                    update_material_attributes(attr_name, values, mesh, mat, "POINT")
-
-                for attr_name, values in polydata.cell_data.items():
-                    update_material_attributes(attr_name, values, mesh, mat, "FACE")
-
-                mesh.update()
-            else:
-                raise ValueError(
-                    f"Number of points in VTK file ({polydata.n_points}) does not match the number of vertices in the mesh ({mesh.vertices})"
-                )
-
-    # print("-" * os.get_terminal_size().columns)
+    mesh.update()

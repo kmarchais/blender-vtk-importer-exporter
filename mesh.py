@@ -3,14 +3,42 @@ from typing import Union
 import bpy
 import numpy as np
 import pyvista as pv
-from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
+
 from .attributes import initialize_material_attributes, update_attributes_from_vtk
 from .material_panel import update_attributes_enum
+from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
 
 VTK_data = Union[pv.PolyData, pv.UnstructuredGrid]
 
+
 def update_mesh(scene):
-    update_attributes_from_vtk(scene)
+    if (
+        "vtk_files" not in bpy.context.scene
+        and "vtk_directory" not in bpy.context.scene
+    ):
+        return
+
+    frame = scene.frame_current
+    # print(f"\nframe : {frame}")
+
+    files = bpy.context.scene["vtk_files"]
+    directory = bpy.context.scene["vtk_directory"]
+    frame_sep = bpy.context.scene["frame_sep"]
+
+    for file in files:
+        mesh_name = file[0].split(".")[0].split(frame_sep)[0]
+
+        if len(file) > 1:
+            polydata = pv.read(f"{directory}/{file[frame]}")
+            mesh: bpy.types.Mesh = bpy.data.meshes[mesh_name]
+
+            if polydata.n_points == len(mesh.vertices):
+                update_attributes_from_vtk(polydata, mesh_name)
+            else:
+                raise NotImplementedError(
+                    f"Number of points in VTK file ({polydata.n_points}) does not match the number of vertices in the mesh ({mesh.vertices})"
+                )
+
 
 def get_mesh_data_from_vtk(vtk_data: VTK_data):
     edges = []
