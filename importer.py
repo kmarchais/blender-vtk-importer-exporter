@@ -118,8 +118,6 @@ class VTK_PT_import(bpy.types.Panel):
         sfile = context.space_data
         operator = sfile.active_operator
 
-        print(operator.bl_idname)
-
         return operator.bl_idname == "IMPORT_MESH_OT_vtk"
 
     def draw(self, context):

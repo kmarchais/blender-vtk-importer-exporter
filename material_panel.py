@@ -1,9 +1,11 @@
+import warnings
+from typing import Literal
+
 import bpy
 import matplotlib.pyplot as plt
 
-from typing import Literal
-
 from .colorbar import create_colorbar, remove_colorbar, update_colorbar
+
 
 def update_data_range(context, frame_range: Literal["global", "current_frame"]):
     mat = context.object.active_material
@@ -13,16 +15,24 @@ def update_data_range(context, frame_range: Literal["global", "current_frame"]):
 
         obj = context.object
         mesh = obj.data
-        attr_type = mesh.attributes[mat.vtk_attributes].data.data.data_type
-        if attr_type == 'FLOAT':
+
+        if vtk_attribute not in mesh.attributes:
+            warnings.warn(f"Attribute {vtk_attribute} not found in mesh", stacklevel=2)
+            return
+        attr_type = mesh.attributes[vtk_attribute].data.data.data_type
+        if attr_type == "FLOAT":
             min_value = mat["attributes"][vtk_attribute][f"{frame_range}_min"]
             max_value = mat["attributes"][vtk_attribute][f"{frame_range}_max"]
             map_range_node.inputs["From Min"].default_value = min_value
             map_range_node.inputs["From Max"].default_value = max_value
-        elif attr_type in ['FLOAT2', 'FLOAT_VECTOR']:
+        elif attr_type in ["FLOAT2", "FLOAT_VECTOR"]:
             component = mat.vtk_attribute_component
-            min_value = mat["attributes"][vtk_attribute][component][f"{frame_range}_min"]
-            max_value = mat["attributes"][vtk_attribute][component][f"{frame_range}_max"]
+            min_value = mat["attributes"][vtk_attribute][component][
+                f"{frame_range}_min"
+            ]
+            max_value = mat["attributes"][vtk_attribute][component][
+                f"{frame_range}_max"
+            ]
             map_range_node.inputs["From Min"].default_value = min_value
             map_range_node.inputs["From Max"].default_value = max_value
 
@@ -42,6 +52,7 @@ class VTK_OT_Data_range_all_frames(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
+
 class VTK_OT_Data_range_current_frame(bpy.types.Operator):
     bl_idname = "vtk.button_current_frame"
     bl_label = "Data range of the current frame"
@@ -57,6 +68,7 @@ class VTK_OT_Data_range_current_frame(bpy.types.Operator):
     def invoke(self, context, event):
         return self.execute(context)
 
+
 class VTK_OT_Data_range_custom(bpy.types.Operator):
     bl_idname = "vtk.button_custom_data_range"
     bl_label = "Custom data range"
@@ -68,8 +80,12 @@ class VTK_OT_Data_range_custom(bpy.types.Operator):
 
     def execute(self, context):
         mat = context.object.active_material
-        mat.node_tree.nodes["Map Range"].inputs["From Min"].default_value = self.min_value
-        mat.node_tree.nodes["Map Range"].inputs["From Max"].default_value = self.max_value
+        mat.node_tree.nodes["Map Range"].inputs[
+            "From Min"
+        ].default_value = self.min_value
+        mat.node_tree.nodes["Map Range"].inputs[
+            "From Max"
+        ].default_value = self.max_value
 
         update_colorbar(self, context)
 
@@ -77,15 +93,20 @@ class VTK_OT_Data_range_custom(bpy.types.Operator):
 
     def invoke(self, context, event):
         mat = context.object.active_material
-        self.min_value = mat.node_tree.nodes["Map Range"].inputs["From Min"].default_value
-        self.max_value = mat.node_tree.nodes["Map Range"].inputs["From Max"].default_value
+        self.min_value = (
+            mat.node_tree.nodes["Map Range"].inputs["From Min"].default_value
+        )
+        self.max_value = (
+            mat.node_tree.nodes["Map Range"].inputs["From Max"].default_value
+        )
         return context.window_manager.invoke_props_dialog(self)
+
 
 class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
     bl_label = "VTK attributes"
     bl_idname = "MATERIAL_PT_VTK_Attributes"
-    bl_space_type = 'PROPERTIES'
-    bl_region_type = 'WINDOW'
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
     bl_context = "material"
 
     @classmethod
@@ -106,17 +127,40 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
 
         row = layout.row()
         row.label(text="Attribute")
-        row.prop(data=material, property="vtk_attributes", text="", icon_value=0, emboss=True)
-        row.prop(data=material, property="vtk_attribute_component", text="", icon_value=0, emboss=True)
+        row.prop(
+            data=material, property="vtk_attributes", text="", icon_value=0, emboss=True
+        )
+        row.prop(
+            data=material,
+            property="vtk_attribute_component",
+            text="",
+            icon_value=0,
+            emboss=True,
+        )
 
         row = layout.row(align=True)
         row.label(text="Data range")
-        row.operator("vtk.button_all_frames", text="All frames",
-                     icon_value=0, emboss=True, depress=False)
-        row.operator("vtk.button_current_frame", text="Current",
-                     icon_value=0, emboss=True, depress=False)
-        row.operator("vtk.button_custom_data_range", text="Custom",
-                     icon_value=0, emboss=True, depress=False)
+        row.operator(
+            "vtk.button_all_frames",
+            text="All frames",
+            icon_value=0,
+            emboss=True,
+            depress=False,
+        )
+        row.operator(
+            "vtk.button_current_frame",
+            text="Current",
+            icon_value=0,
+            emboss=True,
+            depress=False,
+        )
+        row.operator(
+            "vtk.button_custom_data_range",
+            text="Custom",
+            icon_value=0,
+            emboss=True,
+            depress=False,
+        )
 
         row = layout.row()
         row.label(text="Color Map")
@@ -141,13 +185,16 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
             row.label(text="Number format")
             row.prop(material, "vtk_scalar_bar_number_format", text="")
 
+
 def get_availbale_colormaps():
     colormaps = list(filter(lambda cmap: cmap[-2:] != "_r", plt.colormaps()))
-    return sorted(colormaps, key=lambda s: s.split('.')[-1].lower())
+    return sorted(colormaps, key=lambda s: s.split(".")[-1].lower())
+
 
 def vtk_enum_colormaps(self, context):
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
-    return [(cmap, cmap.split('.')[-1], cmap) for cmap in get_availbale_colormaps()]
+    return [(cmap, cmap.split(".")[-1], cmap) for cmap in get_availbale_colormaps()]
+
 
 def vtk_enum_attributes(self, context):
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
@@ -157,26 +204,32 @@ def vtk_enum_attributes(self, context):
     if "attributes" not in mat:
         return []
     attributes = list(mat["attributes"].to_dict().keys())
-    return [(rf"{attribute}",)*3 for attribute in attributes]
+    return [(rf"{attribute}",) * 3 for attribute in attributes]
+
 
 def vtk_enum_attribute_component(self, context):
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
-    mat = context.object.active_material
+    mat: bpy.types.Material = context.object.active_material
     if mat is None:
         return []
     if "attributes" not in mat:
         return []
-    obj = context.object
-    mesh = obj.data
-    attr_type = mesh.attributes[mat.vtk_attributes].data.data.data_type
+    obj: bpy.types.Object = context.object
+    mesh: bpy.types.Mesh = obj.data
+    if mat.vtk_attributes not in mesh.attributes:
+        attr_type = None
+        warnings.warn(f"Attribute {mat.vtk_attributes} not found in mesh", stacklevel=2)
+    else:
+        attr_type = mesh.attributes[mat.vtk_attributes].data.data.data_type
 
-    components = [] # 'FLOAT'
-    if attr_type == 'FLOAT_VECTOR':
+    components = []  # 'FLOAT'
+    if attr_type == "FLOAT_VECTOR":
         components = ["Magnitude", "X", "Y", "Z"]
-    elif attr_type == 'FLOAT2':
+    elif attr_type == "FLOAT2":
         components = ["Magnitude", "X", "Y"]
 
-    return [(rf"{component}",)*3 for component in components]
+    return [(rf"{component}",) * 3 for component in components]
+
 
 def update_colormap_enum(self, context):
     if "Color Ramp" not in self.node_tree.nodes:
@@ -201,32 +254,30 @@ def update_attributes_enum(self, context):
     map_range_node = self.node_tree.nodes["Map Range"]
     mesh = context.object.data
     attr_type = mesh.attributes[self.vtk_attributes].data.data.data_type
-    if attr_type == 'FLOAT':
-        self.node_tree.links.new(attribute_node.outputs["Fac"], map_range_node.inputs["Value"])
-    elif attr_type in ['FLOAT_VECTOR', 'FLOAT2']:
+    if attr_type == "FLOAT":
+        self.node_tree.links.new(
+            attribute_node.outputs["Fac"], map_range_node.inputs["Value"]
+        )
+    elif attr_type in ["FLOAT_VECTOR", "FLOAT2"]:
         if self.vtk_attribute_component == "Magnitude":
             length_node = self.node_tree.nodes["Vector Math"]
             self.node_tree.links.new(
-                attribute_node.outputs["Vector"],
-                length_node.inputs["Vector"]
+                attribute_node.outputs["Vector"], length_node.inputs["Vector"]
             )
             self.node_tree.links.new(
-                length_node.outputs["Value"],
-                map_range_node.inputs["Value"]
+                length_node.outputs["Value"], map_range_node.inputs["Value"]
             )
         elif self.vtk_attribute_component in ["X", "Y", "Z"]:
             separate_node = self.node_tree.nodes["Separate XYZ"]
             component = self.vtk_attribute_component
             self.node_tree.links.new(
-                attribute_node.outputs["Vector"],
-                separate_node.inputs["Vector"]
+                attribute_node.outputs["Vector"], separate_node.inputs["Vector"]
             )
             self.node_tree.links.new(
-                separate_node.outputs[component],
-                map_range_node.inputs["Value"]
+                separate_node.outputs[component], map_range_node.inputs["Value"]
             )
 
-    update_data_range(context, 'global')
+    update_data_range(context, "global")
 
     update_colorbar(self, context)
 
@@ -241,53 +292,49 @@ def show_scalar_bar(self, context):
 def register():
     bpy.utils.register_class(MATERIAL_PT_VTK_Attributes)
     bpy.types.Material.vtk_colormaps = bpy.props.EnumProperty(
-        name='Colormaps',
-        description='',
+        name="Colormaps",
+        description="",
         items=vtk_enum_colormaps,
-        update=update_colormap_enum
+        update=update_colormap_enum,
     )
     bpy.types.Material.vtk_attributes = bpy.props.EnumProperty(
-        name='Attributes',
-        description='',
+        name="Attributes",
+        description="",
         items=vtk_enum_attributes,
-        update=update_attributes_enum
+        update=update_attributes_enum,
     )
     bpy.types.Material.vtk_attribute_component = bpy.props.EnumProperty(
-        name='Component',
-        description='',
+        name="Component",
+        description="",
         items=vtk_enum_attribute_component,
-        update=update_attributes_enum
+        update=update_attributes_enum,
     )
     bpy.types.Material.vtk_show_scalar_bar = bpy.props.BoolProperty(
-        default=False,
-        update=show_scalar_bar
+        default=False, update=show_scalar_bar
     )
 
     bpy.types.Material.vtk_scalar_bar_labels_color = bpy.props.FloatVectorProperty(
         name="Scalar Bar Labels Color",
-        subtype='COLOR',
+        subtype="COLOR",
         size=4,
         default=(1.0, 1.0, 1.0, 1.0),
         min=0.0,
         max=1.0,
-        update=update_colorbar
+        update=update_colorbar,
     )
 
     bpy.types.Material.vtk_scalar_bar_attribute_name = bpy.props.StringProperty(
-        name="Attribute Name",
-        update=update_colorbar
+        name="Attribute Name", update=update_colorbar
     )
 
     bpy.types.Material.vtk_scalar_bar_scale_numbers = bpy.props.FloatProperty(
-        name="Scale Numbers",
-        default=1.0,
-        update=update_colorbar
+        name="Scale Numbers", default=1.0, update=update_colorbar
     )
 
     bpy.types.Material.vtk_scalar_bar_number_format = bpy.props.StringProperty(
         name="Number Format",
         # default="{:.2f}",
-        update=update_colorbar
+        update=update_colorbar,
     )
 
     bpy.utils.register_class(VTK_OT_Data_range_all_frames)

@@ -132,11 +132,7 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
 
         global_min = material["attributes"][attr_name]["global_min"]
         global_max = material["attributes"][attr_name]["global_max"]
-        # print(f"attribute : {attr_name}\t\
-        #         min : {frame_min}\t\
-        #         max : {frame_max}\t\
-        #         global_min : {global_min}\t\
-        #         global_max : {global_max}")
+
         material["attributes"][attr_name]["current_frame_min"] = frame_min
         material["attributes"][attr_name]["current_frame_max"] = frame_max
         material["attributes"][attr_name]["global_min"] = min(frame_min, global_min)
@@ -151,11 +147,7 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
             component = "Magnitude"
             global_min = material["attributes"][attr_name][component]["global_min"]
             global_max = material["attributes"][attr_name][component]["global_max"]
-            # print(f"attribute : {attr_name}\t\
-            #         min : {frame_min}\t\
-            #         max : {frame_max}\t\
-            #         global_min : {global_min}\t\
-            #         global_max : {global_max}")
+
             material["attributes"][attr_name][component]["current_frame_min"] = (
                 frame_min
             )
@@ -168,8 +160,7 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
             material["attributes"][attr_name][component]["global_max"] = max(
                 frame_max, global_max
             )
-        # elif attr_values.shape[1] == 4:
-        #     attr_type = 'color'
+
         else:
             print(
                 f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"

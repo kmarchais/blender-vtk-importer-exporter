@@ -19,7 +19,6 @@ def update_mesh(scene):
         return
 
     frame = scene.frame_current
-    # print(f"\nframe : {frame}")
 
     files = bpy.context.scene["vtk_files"]
     directory = bpy.context.scene["vtk_directory"]
@@ -32,12 +31,13 @@ def update_mesh(scene):
             polydata = pv.read(f"{directory}/{file[frame]}")
             mesh: bpy.types.Mesh = bpy.data.meshes[mesh_name]
 
-            if polydata.n_points == len(mesh.vertices):
+            if (polydata.n_points, polydata.n_cells) == (
+                len(mesh.vertices),
+                len(mesh.polygons),
+            ):
                 update_attributes_from_vtk(polydata, mesh_name)
-            else:
-                raise NotImplementedError(
-                    f"Number of points in VTK file ({polydata.n_points}) does not match the number of vertices in the mesh ({mesh.vertices})"
-                )
+            else:  # mesh has changed
+                update_mesh_from_vtk(mesh, polydata, update_attributes=True)
 
 
 def get_mesh_data_from_vtk(vtk_data: VTK_data):
@@ -85,14 +85,15 @@ def vtk_to_mesh(vtk_data, mesh_name):
 
 
 def set_mesh_attributes(mesh, vtk_data):
-    # create mesh attributes
-    pass
+    for attr_name, values in vtk_data.point_data.items():
+        initialize_material_attributes(
+            attr_name, values, mesh, mesh.materials[0], "POINT"
+        )
 
-    # for attr_name, values in data_object.point_data.items():
-    #     initialize_material_attributes(attr_name, values, mesh, mesh.materials[0], 'POINT')
-
-    # for attr_name, values in data_object.cell_data.items():
-    #     initialize_material_attributes(attr_name, values, mesh, mesh.materials[0], 'FACE')
+    for attr_name, values in vtk_data.cell_data.items():
+        initialize_material_attributes(
+            attr_name, values, mesh, mesh.materials[0], "FACE"
+        )
 
 
 def create_object(context, vtk_data, mesh_name) -> bpy.types.Object:
