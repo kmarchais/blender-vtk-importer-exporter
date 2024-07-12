@@ -1,24 +1,25 @@
-dependencies = {'pip': {},
-                'pyvista': {"url": "https://github.com/pyvista/pyvista"},
-                'cmcrameri': {"url": "https://www.fabiocrameri.ch/colourmaps/"}}
+dependencies = {
+    "pip": {},
+    "pyvista": {"url": "https://github.com/pyvista/pyvista"},
+    "cmcrameri": {"url": "https://www.fabiocrameri.ch/colourmaps/"},
+}
 
 for dependency in dependencies:
-    if dependency != 'pip':
+    if dependency != "pip":
         try:
             __import__(dependency)
         except ImportError:
-            import sys, subprocess
+            import subprocess
+            import sys
+
             subprocess.call([sys.executable, "-m", "pip", "install", dependency])
 
 import bpy
 from bpy.app.handlers import persistent
 
-from . import preferences, material_panel
-from .importer import ImportVTK
-from .exporter import ExportVTK, ExportCSV
+from . import exporter, importer, material_panel, preferences, view3d_panel
 from .attributes import update_attributes_from_vtk
 from .view3d_panel.filters_panel import update_filters
-from . import view3d_panel
 
 bl_info = {
     "name": "VTK import/Export",
@@ -32,25 +33,16 @@ bl_info = {
     "category": "Import-Export",
 }
 
-def menu_func_import(self, context):
-    self.layout.operator(ImportVTK.bl_idname, text="VTK (.vtk, .vtu, .vtp, .vtm)")
-
-
-def menu_func_export(self, context):
-    self.layout.operator(ExportVTK.bl_idname, text="VTK (.vtk)")
-    self.layout.operator(ExportCSV.bl_idname, text="CSV (.csv)")
 
 @persistent
 def update_frame(scene):
     update_attributes_from_vtk(scene)
     update_filters(scene)
 
+
 def register():
-    bpy.utils.register_class(ImportVTK)
-    bpy.utils.register_class(ExportVTK)
-    bpy.utils.register_class(ExportCSV)
-    bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
-    bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
+    exporter.register()
+    importer.register()
     material_panel.register()
     preferences.register()
     view3d_panel.register()
@@ -58,12 +50,10 @@ def register():
     bpy.types.WindowManager.on_frame_change = update_frame
     bpy.app.handlers.frame_change_post.append(bpy.types.WindowManager.on_frame_change)
 
+
 def unregister():
-    bpy.utils.unregister_class(ImportVTK)
-    bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
-    bpy.utils.unregister_class(ExportVTK)
-    bpy.utils.unregister_class(ExportCSV)
-    bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)
+    exporter.unregister()
+    importer.unregister()
     preferences.unregister()
     material_panel.unregister()
     view3d_panel.unregister()
