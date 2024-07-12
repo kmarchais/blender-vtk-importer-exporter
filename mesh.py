@@ -1,3 +1,4 @@
+import warnings
 from typing import Union
 
 import bpy
@@ -57,7 +58,7 @@ def get_mesh_data_from_vtk(vtk_data: VTK_data):
             elif pv.CellType.TRIANGLE.value <= cell_type <= pv.CellType.QUAD.value:
                 faces += cells
             else:
-                print(f"Unsupported cell type: {cell_type} yet.")
+                warnings.warn(f"Unsupported cell type: {cell_type} yet.", stacklevel=2)
 
     return vtk_data.points, edges, faces
 

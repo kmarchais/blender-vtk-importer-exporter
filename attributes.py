@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import bpy
 import numpy as np
@@ -18,8 +19,9 @@ def initialize_material_attributes(attr_name, attr_values, mesh, material, domai
         # elif attr_values.shape[1] == 4:
         #     value_type = 'FLOAT_COLOR'
         else:
-            print(
-                f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"
+            warnings.warn(
+                f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}",
+                stacklevel=2,
             )
     attr = mesh.attributes.new(attr_name, type=value_type, domain=domain)
 
@@ -69,12 +71,14 @@ def initialize_material_attributes(attr_name, attr_values, mesh, material, domai
                     "global_max": max_value,
                 }
         else:
-            print(
-                f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"
+            warnings.warn(
+                f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}",
+                stacklevel=2,
             )
     else:
-        print(
-            f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"
+        warnings.warn(
+            f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}",
+            stacklevel=2,
         )
 
 
@@ -94,8 +98,9 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
             # elif attr_values.shape[1] == 4:
             #     value_type = 'FLOAT_COLOR'
             else:
-                print(
-                    f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"
+                warnings.warn(
+                    f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}",
+                    stacklevel=2,
                 )
 
             component = "Magnitude"
@@ -162,12 +167,14 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
             )
 
         else:
-            print(
-                f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"
+            warnings.warn(
+                f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}",
+                stacklevel=2,
             )
     else:
-        print(
-            f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}"
+        warnings.warn(
+            f"Unsupported attribute shape: {attr_values.shape} for attribute {attr_name}",
+            stacklevel=2,
         )
 
 

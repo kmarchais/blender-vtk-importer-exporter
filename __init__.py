@@ -25,7 +25,7 @@ bl_info = {
     "name": "VTK import/Export",
     "author": "kmarchais",
     "version": (0, 1),
-    "blender": (3, 0, 0),
+    "blender": (3, 6, 0),
     "location": "File > Import-Export",
     "description": "Import/Export VTK files",
     "warning": "",
