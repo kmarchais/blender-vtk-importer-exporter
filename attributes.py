@@ -200,19 +200,24 @@ def update_attributes_from_vtk(scene):
 
         if len(file) > 1:
             polydata = pv.read(f"{directory}/{file[frame]}")
-            mesh = bpy.data.meshes[mesh_name]
+            mesh: bpy.types.Mesh = bpy.data.meshes[mesh_name]
 
-            mesh.attributes["position"].data.foreach_set(
-                "vector", np.ravel(polydata.points)
-            )
-            mat = bpy.data.materials[f"{mesh_name}_attributes"]
+            if polydata.n_points == mesh.vertices:
+                mesh.attributes["position"].data.foreach_set(
+                    "vector", np.ravel(polydata.points)
+                )
+                mat = bpy.data.materials[f"{mesh_name}_attributes"]
 
-            for attr_name, values in polydata.point_data.items():
-                update_material_attributes(attr_name, values, mesh, mat, "POINT")
+                for attr_name, values in polydata.point_data.items():
+                    update_material_attributes(attr_name, values, mesh, mat, "POINT")
 
-            for attr_name, values in polydata.cell_data.items():
-                update_material_attributes(attr_name, values, mesh, mat, "FACE")
+                for attr_name, values in polydata.cell_data.items():
+                    update_material_attributes(attr_name, values, mesh, mat, "FACE")
 
-            mesh.update()
+                mesh.update()
+            else:
+                raise ValueError(
+                    f"Number of points in VTK file ({polydata.n_points}) does not match the number of vertices in the mesh ({mesh.vertices})"
+                )
 
     # print("-" * os.get_terminal_size().columns)

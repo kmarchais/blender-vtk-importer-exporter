@@ -71,7 +71,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
     def execute(self, context):
         # global files, directory
 
-        files = sort_files(self.files)
+        files = sort_files(self.files, self.frame_sep)
 
         directory = os.path.dirname(self.filepath)
 

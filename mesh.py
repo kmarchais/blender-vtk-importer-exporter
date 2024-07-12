@@ -4,11 +4,13 @@ import bpy
 import numpy as np
 import pyvista as pv
 from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
-from .attributes import initialize_material_attributes
+from .attributes import initialize_material_attributes, update_attributes_from_vtk
 from .material_panel import update_attributes_enum
 
 VTK_data = Union[pv.PolyData, pv.UnstructuredGrid]
 
+def update_mesh(scene):
+    update_attributes_from_vtk(scene)
 
 def get_mesh_data_from_vtk(vtk_data: VTK_data):
     edges = []

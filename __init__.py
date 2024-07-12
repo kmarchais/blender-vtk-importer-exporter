@@ -19,6 +19,7 @@ from bpy.app.handlers import persistent
 
 from . import exporter, importer, material_panel, preferences, view3d_panel
 from .attributes import update_attributes_from_vtk
+from .mesh import update_mesh
 from .view3d_panel.filters_panel import update_filters
 
 bl_info = {
@@ -36,7 +37,7 @@ bl_info = {
 
 @persistent
 def update_frame(scene):
-    update_attributes_from_vtk(scene)
+    update_mesh(scene)
     update_filters(scene)
 
 
