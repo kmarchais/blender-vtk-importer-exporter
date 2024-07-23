@@ -1,0 +1,31 @@
+[project]
+name = "blender_vtk_importer_exporter"
+version = "0.1.0"
+description = "Library for the Blender-VTK-importer-exporter addon."
+authors = [{ name = "Kevin Marchais", email = "kevin.marchais@hivelix.io" }]
+dependencies = ["pyvista", "cmcrameri"]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[project.optional-dependencies]
+dev = [
+    "bpy",
+    "blender-stubs",
+    # "fake-bpy-module-latest", # https://github.com/nutti/fake-bpy-module?tab=readme-ov-file#supported-blender-version
+    "ruff",
+    "mypy",
+    "pytest",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/blender_vtk_importer_exporter"]
+
+[tool.ruff.lint]
+select = ["ALL"]

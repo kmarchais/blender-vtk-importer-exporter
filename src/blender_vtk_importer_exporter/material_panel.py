@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import warnings
 from typing import Literal
 
@@ -7,7 +9,10 @@ import matplotlib.pyplot as plt
 from .colorbar import create_colorbar, remove_colorbar, update_colorbar
 
 
-def update_data_range(context, frame_range: Literal["global", "current_frame"]):
+def update_data_range(
+    context: bpy.types.Context,
+    frame_range: Literal["global", "current_frame"],
+):
     mat = context.object.active_material
     vtk_attribute = mat.vtk_attributes
     if vtk_attribute in mat["attributes"]:
@@ -43,13 +48,13 @@ class VTK_OT_Data_range_all_frames(bpy.types.Operator):
     bl_description = "Data range over all time steps"
     bl_options = {"REGISTER", "UNDO"}
 
-    def execute(self, context):
+    def execute(self, context: bpy.types.Context) -> set[str]:
         update_data_range(context, "global")
         update_colorbar(self, context)
 
         return {"FINISHED"}
 
-    def invoke(self, context, event):
+    def invoke(self, context: bpy.types.Context, _: bpy.types.Event) -> set[str]:
         return self.execute(context)
 
 
@@ -59,13 +64,13 @@ class VTK_OT_Data_range_current_frame(bpy.types.Operator):
     bl_description = "Data range of the current frame"
     bl_options = {"REGISTER", "UNDO"}
 
-    def execute(self, context):
+    def execute(self, context: bpy.types.Context) -> set[str]:
         update_data_range(context, "current_frame")
         update_colorbar(self, context)
 
         return {"FINISHED"}
 
-    def invoke(self, context, event):
+    def invoke(self, context: bpy.types.Context, _: bpy.types.Event) -> set[str]:
         return self.execute(context)
 
 
@@ -78,7 +83,7 @@ class VTK_OT_Data_range_custom(bpy.types.Operator):
     min_value: bpy.props.FloatProperty(name="Min Value")
     max_value: bpy.props.FloatProperty(name="Max Value")
 
-    def execute(self, context):
+    def execute(self, context: bpy.types.Context) -> set[str]:
         mat = context.object.active_material
         mat.node_tree.nodes["Map Range"].inputs[
             "From Min"
@@ -91,7 +96,7 @@ class VTK_OT_Data_range_custom(bpy.types.Operator):
 
         return {"FINISHED"}
 
-    def invoke(self, context, event):
+    def invoke(self, context: bpy.types.Context, _: bpy.types.Event) -> set[str]:
         mat = context.object.active_material
         self.min_value = (
             mat.node_tree.nodes["Map Range"].inputs["From Min"].default_value
@@ -110,7 +115,7 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
     bl_context = "material"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context: bpy.types.Context) -> bool:
         mat = context.object.active_material
         if mat is None:
             return False
@@ -120,7 +125,7 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
             return False
         return True
 
-    def draw(self, context):
+    def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
 
         material = context.object.active_material
@@ -191,12 +196,12 @@ def get_availbale_colormaps():
     return sorted(colormaps, key=lambda s: s.split(".")[-1].lower())
 
 
-def vtk_enum_colormaps(self, context):
+def vtk_enum_colormaps(self, _: bpy.types.Context) -> list[tuple[str, str, str]]:
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
     return [(cmap, cmap.split(".")[-1], cmap) for cmap in get_availbale_colormaps()]
 
 
-def vtk_enum_attributes(self, context):
+def vtk_enum_attributes(self, context: bpy.types.Context) -> list[tuple[str, str, str]]:
     # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
     mat = context.object.active_material
     if mat is None:

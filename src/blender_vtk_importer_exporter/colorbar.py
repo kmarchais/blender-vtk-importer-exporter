@@ -1,11 +1,11 @@
 import bpy
-import numpy as np
-
 import matplotlib.pyplot as plt
+import numpy as np
 
 from .attributes import update_attributes_from_vtk
 
-def create_colorbar(context):
+
+def create_colorbar(context: bpy.types.Context) -> None:
     mat = context.object.active_material
 
     n_colors = len(mat.node_tree.nodes["Color Ramp"].color_ramp.elements)
@@ -33,8 +33,8 @@ def create_colorbar(context):
     color_fac = (attr_value - min_value) / (max_value - min_value)
 
     cbar_mat = bpy.data.materials.new(name=cbar_name)
-    attr = cbar_mesh.attributes.new("Color Fac", type='FLOAT', domain='POINT')
-    attr.data.foreach_set('value', color_fac)
+    attr = cbar_mesh.attributes.new("Color Fac", type="FLOAT", domain="POINT")
+    attr.data.foreach_set("value", color_fac)
 
     cbar_mat.use_nodes = True
     bsdf = cbar_mat.node_tree.nodes["Principled BSDF"]
@@ -46,7 +46,7 @@ def create_colorbar(context):
     attribute_node = cbar_mat.node_tree.nodes.new("ShaderNodeAttribute")
     attribute_node.attribute_name = "Color Fac"
 
-    #cbar_mat.vtk_colormaps = colormap
+    # cbar_mat.vtk_colormaps = colormap
     color_ramp_node = cbar_mat.node_tree.nodes.new("ShaderNodeValToRGB")
     cmap = plt.get_cmap(mat.vtk_colormaps)
 
@@ -60,50 +60,50 @@ def create_colorbar(context):
             color_ramp_node.color_ramp.elements.new(location)
 
     cbar_mat.node_tree.links.new(
-        attribute_node.outputs["Fac"],
-        color_ramp_node.inputs["Fac"]
+        attribute_node.outputs["Fac"], color_ramp_node.inputs["Fac"]
     )
     cbar_mat.node_tree.links.new(
-        color_ramp_node.outputs["Color"],
-        emission_shader_node.inputs["Color"]
+        color_ramp_node.outputs["Color"], emission_shader_node.inputs["Color"]
     )
     cbar_mat.node_tree.links.new(
-        emission_shader_node.outputs["Emission"],
-        material_output_node.inputs["Surface"]
+        emission_shader_node.outputs["Emission"], material_output_node.inputs["Surface"]
     )
 
     cbar_obj.data.materials.append(cbar_mat)
 
-
     scale = 0.1 * cbar_scale
 
-    min_range_curve = bpy.data.curves.new(name=f"{mat.name}_min", type='FONT')
-    min_range_obj = bpy.data.objects.new(name=f"{mat.name}_min", object_data=min_range_curve)
+    min_range_curve = bpy.data.curves.new(name=f"{mat.name}_min", type="FONT")
+    min_range_obj = bpy.data.objects.new(
+        name=f"{mat.name}_min", object_data=min_range_curve
+    )
     min_range_obj.scale = (scale, scale, scale)
     min_range_obj.location = (0.15 * cbar_scale, 0, 0)
 
-    max_range_curve = bpy.data.curves.new(name=f"{mat.name}_max", type='FONT')
-    max_range_obj = bpy.data.objects.new(name=f"{mat.name}_max", object_data=max_range_curve)
+    max_range_curve = bpy.data.curves.new(name=f"{mat.name}_max", type="FONT")
+    max_range_obj = bpy.data.objects.new(
+        name=f"{mat.name}_max", object_data=max_range_curve
+    )
     max_range_obj.scale = (scale, scale, scale)
     max_range_obj.location = (
         0.15 * cbar_scale,
         cbar_scale - scale * max_range_obj.dimensions[1],
-        0
+        0,
     )
 
-    attribute_curve = bpy.data.curves.new(name=f"{mat.name}_attribute_name", type='FONT')
+    attribute_curve = bpy.data.curves.new(
+        name=f"{mat.name}_attribute_name", type="FONT"
+    )
     attribute_obj = bpy.data.objects.new(
-        name=f"{mat.name}_attribute_name",
-        object_data=attribute_curve
+        name=f"{mat.name}_attribute_name", object_data=attribute_curve
     )
     attribute_obj.scale = (scale, scale, scale)
     attribute_obj.rotation_euler = (0, 0, np.pi / 2)
     attribute_obj.location = (
         0.2 * cbar_scale,
         0.25 * (cbar_scale - scale * attribute_obj.dimensions[1]),
-        0
+        0,
     )
-
 
     cbar_label_mat = bpy.data.materials.new(name=f"{cbar_name}_labels")
 
@@ -117,12 +117,10 @@ def create_colorbar(context):
     material_output_node = cbar_label_mat.node_tree.nodes["Material Output"]
 
     cbar_label_mat.node_tree.links.new(
-        combine_color_node.outputs["Color"],
-        emission_shader_node.inputs["Color"]
+        combine_color_node.outputs["Color"], emission_shader_node.inputs["Color"]
     )
     cbar_label_mat.node_tree.links.new(
-        emission_shader_node.outputs["Emission"],
-        material_output_node.inputs["Surface"]
+        emission_shader_node.outputs["Emission"], material_output_node.inputs["Surface"]
     )
 
     min_range_obj.data.materials.append(cbar_label_mat)
@@ -137,14 +135,14 @@ def create_colorbar(context):
     bpy.context.scene.collection.objects.link(max_range_obj)
     bpy.context.scene.collection.objects.link(attribute_obj)
 
-
-    cbar_obj.parent = bpy.data.objects['Camera']
+    cbar_obj.parent = bpy.data.objects["Camera"]
     cbar_obj.location = (-0.35, -0.2, -1)
     cbar_obj.select_set(False)
 
     update_colorbar(None, context)
 
-def update_colorbar(self, context):
+
+def update_colorbar(self, context: bpy.types.Context) -> None:
     mat = context.object.active_material
 
     if not mat.vtk_show_scalar_bar:
@@ -159,7 +157,7 @@ def update_colorbar(self, context):
     n_colors = len(color_ramp_node.color_ramp.elements)
     for i in range(n_colors):
         location = i / (n_colors - 1)
-        rgb = [c**2.2 for c in cmap(location)] # sRGB to Linear RGB
+        rgb = [c**2.2 for c in cmap(location)]  # sRGB to Linear RGB
         color_ramp_node.color_ramp.elements[i].color = rgb
 
     scale = mat.vtk_scalar_bar_scale_numbers
@@ -178,12 +176,15 @@ def update_colorbar(self, context):
 
     combine_color_node = cbar_label_mat.node_tree.nodes["Combine Color"]
     combine_color_node.inputs["Red"].default_value = mat.vtk_scalar_bar_labels_color[0]
-    combine_color_node.inputs["Green"].default_value = mat.vtk_scalar_bar_labels_color[1]
+    combine_color_node.inputs["Green"].default_value = mat.vtk_scalar_bar_labels_color[
+        1
+    ]
     combine_color_node.inputs["Blue"].default_value = mat.vtk_scalar_bar_labels_color[2]
 
     mat.vtk_scalar_bar_attribute_name = mat.vtk_attributes
 
-def remove_colorbar(context):
+
+def remove_colorbar(context: bpy.types.Context) -> None:
     mat = context.object.active_material
 
     cbar_mat = bpy.data.materials[f"{mat.name}_cbar"]

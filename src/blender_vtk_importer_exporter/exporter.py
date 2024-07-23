@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import csv
+from pathlib import Path
 
 import bpy
 import numpy as np
@@ -7,7 +10,7 @@ from bpy_extras.io_utils import ExportHelper
 
 
 class ExportVTK(bpy.types.Operator, ExportHelper):
-    """Export mesh to a VTK file"""
+    """Export mesh to a VTK file."""
 
     bl_idname = "export.vtk"
     bl_label = "Export VTK"
@@ -23,7 +26,7 @@ class ExportVTK(bpy.types.Operator, ExportHelper):
         type=bpy.types.OperatorFileListElement, options={"HIDDEN", "SKIP_SAVE"}
     )
 
-    def execute(self, context):
+    def execute(self, _: bpy.types.Context) -> set[str]:
         obj = bpy.context.active_object
         mesh = obj.data
 
@@ -67,7 +70,7 @@ class ExportVTK(bpy.types.Operator, ExportHelper):
 
 
 class ExportCSV(bpy.types.Operator, ExportHelper):
-    """Export mesh attributes to a CSV file"""
+    """Export mesh attributes to a CSV file."""
 
     bl_idname = "export.csv"
     bl_label = "Export CSV"
@@ -83,7 +86,7 @@ class ExportCSV(bpy.types.Operator, ExportHelper):
         type=bpy.types.OperatorFileListElement, options={"HIDDEN", "SKIP_SAVE"}
     )
 
-    def execute(self, context):
+    def execute(self, _: bpy.types.Context) -> set[str]:
         obj = bpy.context.active_object
         mesh = obj.data
 
@@ -123,7 +126,7 @@ class ExportCSV(bpy.types.Operator, ExportHelper):
             else:
                 attributes[attr.name] = array
 
-        with open(self.filepath, "w", newline="") as csv_file:
+        with Path(self.filepath).open("w", newline="") as csv_file:
             writer = csv.writer(csv_file)
             writer.writerow(attributes.keys())
             writer.writerows(zip(*attributes.values()))
@@ -131,18 +134,18 @@ class ExportCSV(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
 
-def menu_func_export(self, context):
+def menu_func_export(self, _: bpy.types.Context) -> None:
     self.layout.operator(ExportVTK.bl_idname, text="VTK (.vtk)")
     self.layout.operator(ExportCSV.bl_idname, text="CSV (.csv)")
 
 
-def register():
+def register() -> None:
     bpy.utils.register_class(ExportVTK)
     bpy.utils.register_class(ExportCSV)
     bpy.types.TOPBAR_MT_file_export.append(menu_func_export)
 
 
-def unregister():
+def unregister() -> None:
     bpy.utils.unregister_class(ExportVTK)
     bpy.utils.unregister_class(ExportCSV)
     bpy.types.TOPBAR_MT_file_export.remove(menu_func_export)

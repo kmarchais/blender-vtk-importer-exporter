@@ -2,14 +2,14 @@ import bpy
 import matplotlib.pyplot as plt
 
 
-def create_attribute_material_nodes(mesh_name):
+def create_attribute_material_nodes(mesh_name: str) -> None:
     mat = bpy.data.materials[f"{mesh_name}_attributes"]
     mat.use_nodes = True
 
     bsdf = mat.node_tree.nodes["Principled BSDF"]
     material_output_node = mat.node_tree.nodes["Material Output"]
 
-    attr_name = list(mat["attributes"].to_dict().keys())[0]
+    attr_name = next(iter(mat["attributes"].to_dict().keys()))
 
     attribute_node = mat.node_tree.nodes.new("ShaderNodeAttribute")
     attribute_node.attribute_name = attr_name
@@ -17,12 +17,14 @@ def create_attribute_material_nodes(mesh_name):
     length_node = mat.node_tree.nodes.new("ShaderNodeVectorMath")
     length_node.operation = "LENGTH"
     mat.node_tree.links.new(
-        attribute_node.outputs["Vector"], length_node.inputs["Vector"]
+        attribute_node.outputs["Vector"],
+        length_node.inputs["Vector"],
     )
 
     separate_node = mat.node_tree.nodes.new("ShaderNodeSeparateXYZ")
     mat.node_tree.links.new(
-        attribute_node.outputs["Vector"], separate_node.inputs["Vector"]
+        attribute_node.outputs["Vector"],
+        separate_node.inputs["Vector"],
     )
 
     map_range_node = mat.node_tree.nodes.new("ShaderNodeMapRange")
@@ -34,7 +36,7 @@ def create_attribute_material_nodes(mesh_name):
     color_ramp_node = mat.node_tree.nodes.new("ShaderNodeValToRGB")
     cmap = plt.get_cmap(colormap)
     color_ramp_node.color_ramp.elements.remove(
-        color_ramp_node.color_ramp.elements[-1]
+        color_ramp_node.color_ramp.elements[-1],
     )  # remove to create it again in the last iteration to have it selected
     for i in range(n_colors):
         location = i / (n_colors - 1)
@@ -79,16 +81,18 @@ def create_attribute_material_nodes(mesh_name):
     )
 
     mat.node_tree.links.new(
-        map_range_node.outputs["Result"], color_ramp_node.inputs["Fac"]
+        map_range_node.outputs["Result"],
+        color_ramp_node.inputs["Fac"],
     )
     mat.node_tree.links.new(color_ramp_node.outputs["Color"], bsdf.inputs["Base Color"])
     mat.node_tree.links.new(
-        bsdf.outputs["BSDF"], material_output_node.inputs["Surface"]
+        bsdf.outputs["BSDF"],
+        material_output_node.inputs["Surface"],
     )
 
     bpy.data.objects[mesh_name].data.materials.append(mat)
 
-    if "global_min" in mat["attributes"][attr_name].to_dict().keys():
+    if "global_min" in mat["attributes"][attr_name].to_dict():
         map_range_node.inputs["From Min"].default_value = mat["attributes"][attr_name][
             "global_min"
         ]
@@ -102,7 +106,7 @@ def create_attribute_material_nodes(mesh_name):
         map_range_node.inputs["From Max"].default_value = attr_stats["global_max"]
 
 
-def convert_mesh_to_pointcloud(mesh_name):
+def convert_mesh_to_pointcloud(mesh_name: str) -> None:
     bpy.context.scene.render.engine = "CYCLES"
     bpy.context.scene.cycles.device = "GPU"
 

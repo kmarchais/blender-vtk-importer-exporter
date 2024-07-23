@@ -1,4 +1,3 @@
-import os
 import warnings
 
 import bpy
@@ -146,7 +145,8 @@ def update_material_attributes(attr_name, attr_values, mesh, material, domain):
         if attr_values.shape[1] in [2, 3]:
             attr_type = "vector"
             mesh.attributes[attr_name].data.foreach_set(
-                attr_type, attr_values.flatten()
+                attr_type,
+                attr_values.flatten(),
             )
 
             component = "Magnitude"
