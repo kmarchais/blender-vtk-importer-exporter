@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import os
+from pathlib import Path
 
 import bpy
 import pyvista as pv
@@ -8,7 +11,7 @@ from bpy_extras.io_utils import ImportHelper
 from .mesh import create_object
 
 
-def sort_files(file_list, frame_sep):
+def sort_files(file_list, frame_sep: str) -> list[list[str]]:
     sorted_file_list = []
     patterns = []
     for file in file_list:
@@ -29,7 +32,7 @@ def sort_files(file_list, frame_sep):
 
 
 class ImportVTK(bpy.types.Operator, ImportHelper):
-    """Load a VTK file"""
+    """Load a VTK file."""
 
     bl_idname = "import.vtk"
     bl_label = "Import VTK"
@@ -51,7 +54,7 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         default="-",
     )
 
-    def draw(self, context):
+    def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
 
         layout.use_property_split = True
@@ -68,12 +71,12 @@ class ImportVTK(bpy.types.Operator, ImportHelper):
         col = split.column()
         col.prop(operator, "frame_sep", text="")
 
-    def execute(self, context):
+    def execute(self, context: bpy.types.Context) -> set[str]:
         # global files, directory
 
         files = sort_files(self.files, self.frame_sep)
 
-        directory = os.path.dirname(self.filepath)
+        directory = Path(self.filepath).parent
 
         bpy.context.scene["vtk_files"] = files
         bpy.context.scene["vtk_directory"] = directory
@@ -114,13 +117,13 @@ class VTK_PT_import(bpy.types.Panel):
     bl_parent_id = "FILE_PT_operator"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context: bpy.types.Context) -> bool:
         sfile = context.space_data
         operator = sfile.active_operator
 
         return operator.bl_idname == "IMPORT_MESH_OT_vtk"
 
-    def draw(self, context):
+    def draw(self, context: bpy.types.Context) -> None:
         layout = self.layout
         layout.use_property_split = True
         layout.use_property_decorate = False  # No animation.
@@ -131,17 +134,17 @@ class VTK_PT_import(bpy.types.Panel):
         layout.prop(operator, "frame_sep")
 
 
-def menu_func_import(self, context):
+def menu_func_import(self, _: bpy.types.Context) -> None:
     self.layout.operator(ImportVTK.bl_idname, text="VTK (.vtk, .vtu, .vtp, .vtm)")
 
 
-def register():
+def register() -> None:
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
     bpy.utils.register_class(ImportVTK)
     bpy.utils.register_class(VTK_PT_import)
 
 
-def unregister():
+def unregister() -> None:
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
     bpy.utils.unregister_class(ImportVTK)
     bpy.utils.unregister_class(VTK_PT_import)

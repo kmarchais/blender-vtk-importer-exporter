@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import warnings
 from typing import Union
 
@@ -12,7 +14,7 @@ from .nodes import convert_mesh_to_pointcloud, create_attribute_material_nodes
 VTK_data = Union[pv.PolyData, pv.UnstructuredGrid]
 
 
-def update_mesh(scene):
+def update_mesh(scene: bpy.types.Scene) -> None:
     if (
         "vtk_files" not in bpy.context.scene
         and "vtk_directory" not in bpy.context.scene
@@ -41,7 +43,9 @@ def update_mesh(scene):
                 update_mesh_from_vtk(mesh, polydata, update_attributes=True)
 
 
-def get_mesh_data_from_vtk(vtk_data: VTK_data):
+def get_mesh_data_from_vtk(
+    vtk_data: VTK_data,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     edges = []
     faces = []
 
@@ -64,7 +68,10 @@ def get_mesh_data_from_vtk(vtk_data: VTK_data):
 
 
 def update_mesh_from_vtk(
-    mesh: bpy.types.Mesh, vtk_data: VTK_data, update_attributes: bool = True
+    mesh: bpy.types.Mesh,
+    vtk_data: VTK_data,
+    *,
+    update_attributes: bool = True,
 ):
     vertices, edges, faces = get_mesh_data_from_vtk(vtk_data)
 
@@ -75,7 +82,7 @@ def update_mesh_from_vtk(
         set_mesh_attributes(mesh, vtk_data)
 
 
-def vtk_to_mesh(vtk_data, mesh_name):
+def vtk_to_mesh(vtk_data: VTK_data, mesh_name: str) -> bpy.types.Mesh:
     vertices, edges, faces = get_mesh_data_from_vtk(vtk_data)
 
     mesh = bpy.data.meshes.new(mesh_name)
@@ -85,19 +92,31 @@ def vtk_to_mesh(vtk_data, mesh_name):
     return mesh
 
 
-def set_mesh_attributes(mesh, vtk_data):
+def set_mesh_attributes(mesh: bpy.types.Mesh, vtk_data: VTK_data) -> None:
     for attr_name, values in vtk_data.point_data.items():
         initialize_material_attributes(
-            attr_name, values, mesh, mesh.materials[0], "POINT"
+            attr_name,
+            values,
+            mesh,
+            mesh.materials[0],
+            "POINT",
         )
 
     for attr_name, values in vtk_data.cell_data.items():
         initialize_material_attributes(
-            attr_name, values, mesh, mesh.materials[0], "FACE"
+            attr_name,
+            values,
+            mesh,
+            mesh.materials[0],
+            "FACE",
         )
 
 
-def create_object(context, vtk_data, mesh_name) -> bpy.types.Object:
+def create_object(
+    context: bpy.types.Context,
+    vtk_data: VTK_data,
+    mesh_name: str,
+) -> bpy.types.Object:
     # convert vtk mesh to blender mesh
     # if attributes exist
     # - create material for attributes

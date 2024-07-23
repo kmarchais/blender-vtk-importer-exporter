@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import bpy
 import pyvista as pv
 from bpy.types import Context
@@ -7,7 +9,7 @@ from ..mesh import create_object, set_mesh_attributes, vtk_to_mesh
 from .view3d_panel import View3D_VTK_Panel
 
 
-def update_filters(scene):
+def update_filters(scene: bpy.types.Scene) -> None:
     if (
         "vtk_files" not in bpy.context.scene
         and "vtk_directory" not in bpy.context.scene
@@ -108,7 +110,7 @@ class VTK_OT_Clip(bpy.types.Operator):
         default=False,
     )
 
-    def execute(self, context):
+    def execute(self, context: Context) -> set[str]:
         obj = context.object
 
         # name = f"{obj.name}_clipped"
@@ -141,7 +143,7 @@ class VTK_OT_Clip(bpy.types.Operator):
 
         return {"FINISHED"}
 
-    def invoke(self, context, event):
+    def invoke(self, context: Context, _: bpy.types.Event) -> set[str]:
         obj = context.object
         self.clip_name = f"{obj.name}_clipped"
         vtk_file_path = obj["vtk_file_path"]
@@ -162,7 +164,7 @@ class VTK_OT_Warp(bpy.types.Operator):
     bl_label = "Warp"
     bl_description = "Warp"
 
-    def execute(self, context):
+    def execute(self, _: Context) -> set[str]:
         return {"FINISHED"}
 
 
@@ -171,7 +173,7 @@ class VIEW3D_PT_filters(View3D_VTK_Panel, bpy.types.Panel):
     bl_idname = "VIEW3D_PT_VTK_Filters"
 
     @classmethod
-    def poll(cls, context):
+    def poll(cls, context: Context) -> bool:
         if context.object is not None:
             if "vtk_file_path" in context.object:
                 return True
@@ -180,7 +182,7 @@ class VIEW3D_PT_filters(View3D_VTK_Panel, bpy.types.Panel):
                     return True
         return False
 
-    def draw(self, context):
+    def draw(self, _: Context) -> None:
         layout = self.layout
 
         # layout.label(text="Clip")
@@ -194,7 +196,7 @@ class VIEW3D_PT_filters(View3D_VTK_Panel, bpy.types.Panel):
         layout.operator("vtk.warp", text="Warp")
 
 
-def register():
+def register() -> None:
     bpy.utils.register_class(VIEW3D_PT_filters)
     bpy.utils.register_class(VTK_OT_Clip)
     bpy.utils.register_class(VTK_OT_Warp)
@@ -223,7 +225,7 @@ def register():
     # )
 
 
-def unregister():
+def unregister() -> None:
     # del bpy.types.Object.clip_active
     # del bpy.types.Object.clip_normal
     # del bpy.types.Object.clip_origin
