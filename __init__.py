@@ -5,6 +5,7 @@ dependencies = {
 }
 
 import site
+import sys
 user_site = site.getusersitepackages()
 if user_site not in sys.path:
     sys.path.append(user_site)
@@ -15,7 +16,6 @@ for dependency in dependencies:
             __import__(dependency)
         except ImportError:
             import subprocess
-            import sys
             import importlib
             
             subprocess.call([sys.executable, "-m", "pip", "install", dependency])
