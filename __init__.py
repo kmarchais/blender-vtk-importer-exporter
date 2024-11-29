@@ -4,6 +4,11 @@ dependencies = {
     "cmcrameri": {"url": "https://www.fabiocrameri.ch/colourmaps/"},
 }
 
+import site
+user_site = site.getusersitepackages()
+if user_site not in sys.path:
+    sys.path.append(user_site)
+
 for dependency in dependencies:
     if dependency != "pip":
         try:
@@ -11,8 +16,10 @@ for dependency in dependencies:
         except ImportError:
             import subprocess
             import sys
-
+            import importlib
+            
             subprocess.call([sys.executable, "-m", "pip", "install", dependency])
+            importlib.import_module(dependency)
 
 import bpy
 from bpy.app.handlers import persistent
