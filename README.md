@@ -19,6 +19,16 @@
 - Enable the add-on by clicking the checkbox (this will install the required python dependencies)
 - You are ready to import or export VTK files in `File > Import > VTK` or `File > Export > VTK`
 
+### About Blender installed with snap on Linux
+
+Blender installed with snap will prevent the required python dependencies to be install along with other packages provided with Blender, i.e. in `/snap/blender/current/4.2/python/lib/python3.11/site-packages`. Instead, enabling the add-on will install these dependencies in the user file system, most likely `$HOME/.local/lib/python3.11/site-packages`. However, Blender with default settings is ignoring this folder.
+
+A workaround is to edit the file `$HOME/.bash_aliases` and to add the following line:
+```
+alias pyblender='export PYTHONPATH=$HOME/.local/lib/python3.11/site-packages && blender --python-use-system-env'
+```
+From now on, in a fresh terminal, enter `pyblender` instead of `blender` to start Blender.
+
 ## A few things to know
 
 - Several files can be imported at the same time by selecting them all
