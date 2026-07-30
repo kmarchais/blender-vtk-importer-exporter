@@ -51,12 +51,11 @@ def get_mesh_data_from_vtk(vtk_data: VTK_data):
         faces = np.reshape(vtk_data.faces, (vtk_data.n_cells, 4))[:, 1:]
 
     if isinstance(vtk_data, pv.UnstructuredGrid):
-        faces = []
         for cell_type, cells in vtk_data.cells_dict.items():
             if cell_type == pv.CellType.LINE.value:
-                edges = cells
+                edges += cells.tolist()
             elif pv.CellType.TRIANGLE.value <= cell_type <= pv.CellType.QUAD.value:
-                faces += cells
+                faces += cells.tolist()
             else:
                 warnings.warn(f"Unsupported cell type: {cell_type} yet.", stacklevel=2)
 
