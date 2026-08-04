@@ -23,7 +23,7 @@ def reload_modules(verbose=False):
 def get_args(argv):
     usage_text = (
         "Run blender in background mode with pytest:\n"
-        "  blender --python-use-system-env --background --python run_pytest_in_blender.py -- [options]"
+        "  blender --python-use-system-env --background --python run_pytest_in_blender.py -- [options] [pytest options]"
     )
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter, 
@@ -31,38 +31,33 @@ def get_args(argv):
     )
     
     parser.add_argument(
-        "-v", "--verbosity", type=int, default=0, metavar="LEVEL",
-        help="Verbosity level, from 0 to 3"
-    )
-    parser.add_argument(
-        "-k", "--keywords", default="", metavar="EXPRESSION",
-        help="Only run tests which match the given substring expression"
+        "-d", "--details", type=int, default=0, metavar="LEVEL",
+        help="Level of details to print, from 0 to 3"
     )
     
-    args = parser.parse_args(argv)
+    args, pytest_args = parser.parse_known_args(argv)
     
-    return args.verbosity, args.keywords
+    return args.details, pytest_args
 
 
-def main(verbosity=0, keywords=""):
-    # Get comand line args to tune pytest in background mode
+def main(details=0, pytest_args=[]):
+    # Get comand-line flags to setup pytest in background mode
+    #   see https://docs.pytest.org/en/stable/reference/reference.html#command-line-flags
     argv = sys.argv
     if "--" in argv:
-        verbosity, keywords = get_args(argv[argv.index("--") + 1:])
-        
-    # Reload modules in interactive mode
-    if "--background" not in argv:
-        reload_modules()
+        details, pytest_args = get_args(argv[argv.index("--") + 1:])
     
-    # Format args for pytest
-    pytest_args = {
+    # Format the level of details for pytest
+    pytest_args += {
         0: ["-q"],      # Shows only the counts of failed, passed and deselected tests
         1: [],          # Adds the name of each processed file, with successes and failures
         2: ["-v"],      # Shows the result of each individual test, passed or failed
         3: ["-v", "-s"] # Prints on stdout/stderr are no longer captured
-    }.get(verbosity, ["-q"]) # Default same as 0
-    if keywords:
-        pytest_args += ["-k " + keywords]
+    }.get(details, ["-q"]) # Default same as 0
+        
+    # Reload modules in interactive mode
+    if "--background" not in argv:
+        reload_modules()
         
     # Run pytest
     pytest.main(args=pytest_args)
@@ -70,4 +65,4 @@ def main(verbosity=0, keywords=""):
 
 if __name__ == '__main__':
     main() # Default: run all tests with minimal output
-#    main(verbosity=2, keywords="get_mesh_data_from_vtk") # Example running a single file of tests
+#    main(details=2, pytest_args=["-k get_mesh_data_from_vtk"]) # Example running a single file of tests
