@@ -1,4 +1,4 @@
-# Unitary tests of mesh.get_mesh_data_from_vtk()
+# Unit tests of mesh.get_mesh_data_from_vtk()
 
 import importlib
 

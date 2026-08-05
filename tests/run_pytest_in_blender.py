@@ -1,4 +1,4 @@
-# Run unitary tests with pytest
+# Run unit tests with pytest
 
 import sys
 import importlib
