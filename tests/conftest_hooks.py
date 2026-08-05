@@ -14,7 +14,8 @@ import pytest
 ordered_list_of_tests = [
     "utilities",
     "mesh_get_mesh_data_from_vtk",
-    "mesh_vtk_to_mesh"
+    "mesh_vtk_to_mesh",
+    "--nomatch--" # Always last entry, do not delete
 ]
 
 def tests_order(item: pytest.Item) -> int:
