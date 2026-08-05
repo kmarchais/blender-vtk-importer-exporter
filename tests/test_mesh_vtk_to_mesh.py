@@ -17,7 +17,7 @@ class TestClass:
 
     def test_bpy_data_meshes_update(self):
         vtk_data = pv.PolyData([1.0, 2.0, 3.0])
-        mesh_name = unique_mesh_name()
+        mesh_name = unique_mesh_name(bpy.data.meshes.keys())
         mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
         assert (bpy.data.meshes.find(mesh_name) != -1)
         
@@ -31,7 +31,7 @@ class TestClass:
         cells = np.asarray([3, 0, 1, 2])
         celltypes = [pv.CellType.TRIANGLE]
         vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
-        mesh_name = unique_mesh_name()
+        mesh_name = unique_mesh_name(bpy.data.meshes.keys())
         mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
         assert (
             (len(mesh.vertices), len(mesh.edges), len(mesh.polygons)) == 
