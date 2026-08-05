@@ -12,7 +12,7 @@ import pytest
 def reload_modules(verbose=False):
     current_package_prefix = "blender-vtk-importer-exporter-main"
     for name, module in sys.modules.copy().items():
-        if name.startswith((current_package_prefix, "test_")):
+        if name.startswith((current_package_prefix, "utilities", "test_")):
             if verbose:
                 print(f"Reloading {name}")
             importlib.reload(module)
