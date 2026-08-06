@@ -3,15 +3,18 @@
 import bpy
 
 
-def unique_mesh_name(keys=list()):
-    prefix_val = "pytest_mesh_"
+def unique_name(prefix_val=str(), keys=list()):
     prefix_len = len(prefix_val)
     highest_suffix = 0
-    for mesh_name in keys:
-        if mesh_name.startswith(prefix_val):
+    for name in keys:
+        if name.startswith(prefix_val):
             highest_suffix = max(
                 highest_suffix,
-                float(mesh_name[prefix_len:]) # float() is required to handle e.g. 2.001
+                float(name[prefix_len:]) # float() is required to handle e.g. 2.001
             )
     return f"{prefix_val}{int(highest_suffix)+1}"
 
+
+def unique_mesh_name():
+    return unique_name("pytest_mesh_", bpy.data.meshes.keys())
+    

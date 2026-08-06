@@ -13,7 +13,7 @@ m_mesh = importlib.import_module("blender-vtk-importer-exporter-main.mesh")
 class TestClass:
 
     def test_bpy_data_meshes_update(self, pvPD_one_point):
-        mesh_name = unique_mesh_name(bpy.data.meshes.keys())
+        mesh_name = unique_mesh_name()
         mesh = m_mesh.vtk_to_mesh(
             pvPD_one_point,
             mesh_name
@@ -24,7 +24,7 @@ class TestClass:
     def test_one_triangle(self, pvUG_one_triangle):
         mesh = m_mesh.vtk_to_mesh(
             pvUG_one_triangle,
-            unique_mesh_name(bpy.data.meshes.keys())
+            unique_mesh_name()
         )
         assert len(mesh.vertices) == 3
         assert len(mesh.edges)    == 3

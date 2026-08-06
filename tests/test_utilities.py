@@ -7,27 +7,28 @@ from utilities import *
 
 class TestClass:
 
-    def test_unique_mesh_name_empty(self):
+    def test_unique_name_empty(self):
         keys = list()
-        mesh_name = unique_mesh_name(keys)
-        assert len(mesh_name) > 0
+        name = unique_name("pytest_", keys)
+        assert len(name) > 0
         
 
-    def test_unique_mesh_name_no_match(self):
+    def test_unique_name_no_match(self):
         keys = list("Cube")
-        mesh_name = unique_mesh_name(keys)
-        assert len(mesh_name) > 0
+        name = unique_name("pytest_", keys)
+        assert len(name) > 0
         
 
-    def test_unique_mesh_name_matching(self):
+    def test_unique_name_matching(self):
+        prefix = "pytest_"
         keys = list()
-        mesh_name_1 = unique_mesh_name(keys)
-        keys += [mesh_name_1]
-        mesh_name_2 = unique_mesh_name(keys)
-        assert mesh_name_1 != mesh_name_2
+        name_1 = unique_name(prefix, keys)
+        keys += [name_1]
+        name_2 = unique_name(prefix, keys)
+        assert name_1 != name_2
         
 
-    def test_unique_mesh_name_bpy(self):
-        mesh_name = unique_mesh_name(bpy.data.meshes.keys())
+    def test_unique_mesh_name(self):
+        mesh_name = unique_mesh_name()
         assert bpy.data.meshes.find(mesh_name) == -1
         
