@@ -2,9 +2,6 @@
 
 import importlib
 
-import numpy as np
-import pyvista as pv
-
 import bpy
 
 from utilities import *
@@ -15,28 +12,21 @@ m_mesh = importlib.import_module("blender-vtk-importer-exporter-main.mesh")
 
 class TestClass:
 
-    def test_bpy_data_meshes_update(self):
-        vtk_data = pv.PolyData([1.0, 2.0, 3.0])
+    def test_bpy_data_meshes_update(self, pvPD_one_point):
         mesh_name = unique_mesh_name(bpy.data.meshes.keys())
-        mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
-        assert bpy.data.meshes.find(mesh_name) != -1
+        mesh = m_mesh.vtk_to_mesh(
+            pvPD_one_point,
+            mesh_name
+        )
+        assert bpy.data.meshes.find(mesh_name) != -1 # "find != -1" means "found"
         
 
-    def test_one_triangle(self):
-        points = np.asarray(
-            [[0.0, 0.0, 0.0],
-             [1.0, 0.0, 0.0],
-             [0.0, 1.0, 0.0]]
+    def test_one_triangle(self, pvUG_one_triangle):
+        mesh = m_mesh.vtk_to_mesh(
+            pvUG_one_triangle,
+            unique_mesh_name(bpy.data.meshes.keys())
         )
-        cells = np.asarray([3, 0, 1, 2])
-        celltypes = [pv.CellType.TRIANGLE]
-        vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
-        mesh_name = unique_mesh_name(bpy.data.meshes.keys())
-        mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
-        n_vert_edge_poly = (
-            len(mesh.vertices),
-            len(mesh.edges),
-            len(mesh.polygons)
-        )
-        assert n_vert_edge_poly == (3, 3, 1)
+        assert len(mesh.vertices) == 3
+        assert len(mesh.edges)    == 3
+        assert len(mesh.polygons) == 1
         
