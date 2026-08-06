@@ -19,7 +19,7 @@ class TestClass:
         vtk_data = pv.PolyData([1.0, 2.0, 3.0])
         mesh_name = unique_mesh_name(bpy.data.meshes.keys())
         mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
-        assert (bpy.data.meshes.find(mesh_name) != -1)
+        assert bpy.data.meshes.find(mesh_name) != -1
         
 
     def test_one_triangle(self):
@@ -33,8 +33,10 @@ class TestClass:
         vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
         mesh_name = unique_mesh_name(bpy.data.meshes.keys())
         mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
-        assert (
-            (len(mesh.vertices), len(mesh.edges), len(mesh.polygons)) == 
-            (                 3,               3,                  1)
+        n_vert_edge_poly = (
+            len(mesh.vertices),
+            len(mesh.edges),
+            len(mesh.polygons)
         )
+        assert n_vert_edge_poly == (3, 3, 1)
         

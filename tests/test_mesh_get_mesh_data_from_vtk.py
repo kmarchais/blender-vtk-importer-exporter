@@ -25,10 +25,12 @@ class TestClass_UnstructuredGrid:
         celltypes = np.full((len(cells)//3), pv.CellType.LINE)
         vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
         vertices, edges, faces = m_mesh.get_mesh_data_from_vtk(vtk_data)
-        assert (
-            (len(vertices), len(edges), len(faces)) == 
-            (            3,          3,          0)
+        n_vert_edge_face = (
+            len(vertices),
+            len(edges),
+            len(faces)
         )
+        assert n_vert_edge_face == (3, 3, 0)
         
 
     def test_one_triangle(self):
@@ -41,8 +43,10 @@ class TestClass_UnstructuredGrid:
         celltypes = [pv.CellType.TRIANGLE]
         vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
         vertices, edges, faces = m_mesh.get_mesh_data_from_vtk(vtk_data)
-        assert (
-            (len(vertices), len(edges), len(faces)) == 
-            (            3,          0,          1)
+        n_vert_edge_face = (
+            len(vertices),
+            len(edges),
+            len(faces)
         )
+        assert n_vert_edge_face == (3, 0, 1)
         
