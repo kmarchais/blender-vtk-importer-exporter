@@ -56,13 +56,19 @@ def main(details=0, pytest_args=[]):
     }.get(details, ["-q"]) # Default same as 0
         
     # Reload modules in interactive mode
-    if "--background" not in argv:
+    background = "--background" in argv
+    if not background:
         reload_modules()
         
     # Run pytest
-    pytest.main(args=pytest_args)
+    #   see https://docs.pytest.org/en/stable/reference/exit-codes.html
+    exit_code = pytest.main(args=pytest_args)
+    
+    return exit_code, background
     
 
 if __name__ == '__main__':
-    main() # Default: run all tests with minimal output
-#    main(details=2, pytest_args=["-k get_mesh_data_from_vtk"]) # Example running a single file of tests
+    exit_code, background = main() # Default: run all tests with minimal output
+#    exit_code, background = main(details=2, pytest_args=["-k get_mesh_data_from_vtk"]) # Example running a single file of tests
+    if background:
+        sys.exit(exit_code)
