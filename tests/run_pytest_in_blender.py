@@ -1,22 +1,12 @@
 # Run unit tests with pytest
 
 import sys
-import importlib
 import argparse
 
 import pytest
 
-# Reload python scripts possibly modified during development and testing
-#   see: https://blender.stackexchange.com/questions/28504/blender-ignores-changes-to-python-scripts
-#   see: https://docs.python.org/3/library/importlib.html#importlib.reload
-def reload_modules(verbose=False):
-    current_package_prefix = "blender-vtk-importer-exporter-main"
-    for name, module in sys.modules.copy().items():
-        if name.startswith((current_package_prefix, "utilities", "test_")):
-            if verbose:
-                print(f"Reloading {name}")
-            importlib.reload(module)
-            
+from utilities import *
+
 
 # Get this script own arguments
 #   see $BLENDER_HOME/scripts/templates_py/background_job.py

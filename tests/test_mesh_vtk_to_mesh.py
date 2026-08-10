@@ -1,13 +1,11 @@
 # Unit tests of mesh.vtk_to_mesh()
 
-import importlib
-
 import bpy
 
 from utilities import *
 
 
-m_mesh = importlib.import_module("blender-vtk-importer-exporter-main.mesh")
+m_mesh = import_submodule("mesh")
 
 
 class TestClass:

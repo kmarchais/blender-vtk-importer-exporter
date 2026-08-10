@@ -1,9 +1,9 @@
 # Unit tests of mesh.get_mesh_data_from_vtk()
 
-import importlib
+from utilities import *
 
 
-m_mesh = importlib.import_module("blender-vtk-importer-exporter-main.mesh")
+m_mesh = import_submodule("mesh")
 
 
 class TestClass_UnstructuredGrid:
