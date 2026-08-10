@@ -38,8 +38,6 @@ To facilitate the management of verbosity, the option `[-d or --details LEVEL]` 
 
 - 3 : Prints on stdout/stderr are no longer captured
 
-
-
 The following example increases the level of details to 2, and runs only the tests in the file `test_mesh_get_mesh_data_from_vtk.py`.
 
 ## Without graphical display
@@ -64,6 +62,6 @@ Then use `Text > Save` and rerun the script.
 
 # Known issues
 
-- On quitting Blender GUI, an exception is raised in module `unregister()`. It is related to reloading modules before running `pytest`. However, it does not seem to affect the results of `pytest`.
+- On quitting Blender GUI, an exception can be raised in module `unregister()`. It is related to reloading modules before running `pytest`. However, it does not seem to affect the results of `pytest`.
 
 - Due to the caching mechanism of Python import system, renamed or deleted tests are still run when Blender GUI is used. One workaround is to restart Blender. An other one is to purge the `tests/__pycache__` directory.
