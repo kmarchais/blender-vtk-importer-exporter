@@ -5,21 +5,21 @@ import bpy
 from utilities import *
 
 
-class TestClass:
+class TestClass_unique_name:
 
-    def test_unique_name_empty(self):
+    def test_empty(self):
         keys = list()
         name = unique_name("pytest_", keys)
         assert len(name) > 0
         
 
-    def test_unique_name_no_match(self):
+    def test_no_match(self):
         keys = list("Cube")
         name = unique_name("pytest_", keys)
         assert len(name) > 0
         
 
-    def test_unique_name_matching(self):
+    def test_matching(self):
         prefix = "pytest_"
         keys = list()
         name_1 = unique_name(prefix, keys)
@@ -28,7 +28,7 @@ class TestClass:
         assert name_1 != name_2
         
 
-    def test_unique_mesh_name(self):
+    def test_mesh(self):
         mesh_name = unique_mesh_name()
         assert bpy.data.meshes.find(mesh_name) == -1
         
