@@ -5,6 +5,30 @@ import bpy
 from utilities import *
 
 
+class TestClass_modules:
+
+    def test_get_current_module(self):
+        module_name, module_path = get_current_module()
+        assert len(module_name) > 0
+        assert len(module_path) > 0
+        
+
+    def test_import_submodule_root(self):
+        assert import_submodule() is not None
+        
+
+    def test_import_submodule_known(self):
+        assert import_submodule("mesh") is not None
+        
+
+    def test_import_submodule_unknown(self):
+        assert import_submodule("--unknown--") is None
+        
+
+    def test_reload_modules(self):
+        assert reload_modules() > 0
+        
+
 class TestClass_unique_name:
 
     def test_empty(self):
