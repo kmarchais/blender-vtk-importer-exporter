@@ -20,9 +20,9 @@ def pvUG_three_segments():
          2, 2, 0]
     )
     celltypes = np.full((len(cells)//3), pv.CellType.LINE)
-    vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
-    return vtk_data
-
+    dataset = pv.UnstructuredGrid(cells, celltypes, points)
+    return dataset
+    
 
 @pytest.fixture(scope="session")
 def pvUG_one_triangle():
@@ -33,13 +33,13 @@ def pvUG_one_triangle():
     )
     cells = np.asarray([3, 0, 1, 2])
     celltypes = [pv.CellType.TRIANGLE]
-    vtk_data = pv.UnstructuredGrid(cells, celltypes, points)
-    return vtk_data
-
+    dataset = pv.UnstructuredGrid(cells, celltypes, points)
+    return dataset
+    
 
 @pytest.fixture(scope="session")
 def pvPD_one_point():
     points = np.asarray([1.0, 2.0, 3.0])
-    vtk_data = pv.PolyData(points)
-    return vtk_data
+    dataset = pv.PolyData(points)
+    return dataset
     
