@@ -23,28 +23,31 @@ m_mesh       = import_submodule("mesh")
     "name, data_type",
     [
         pytest.param(
-            "int_scalars",         "INT",          id="int_scalars_2_INT",           marks=pytest.mark.xfail
+            "int_scalars", "INT", id="int_scalars_2_INT",
+            marks=pytest.mark.xfail(reason="Not supported yet", strict=True),
         ),
         pytest.param(
-            "int_vectors",         "FLOAT_VECTOR", id="int_vectors_2_FLOAT_VECTOR"
+            "int_vectors", "FLOAT_VECTOR", id="int_vectors_2_FLOAT_VECTOR"
         ),
         pytest.param(
-            "int_tensors",         "FLOAT4X4",     id="int_tensors_2_FLOAT4X4",      marks=pytest.mark.xfail
+            "int_tensors", "FLOAT4X4", id="int_tensors_2_FLOAT4X4",
+            marks=pytest.mark.xfail(reason="Not supported yet", strict=True),
         ),
         pytest.param(
-            "flt_scalars",         "FLOAT",        id="float_scalars_2_FLOAT"
+            "flt_scalars", "FLOAT", id="float_scalars_2_FLOAT"
         ),
         pytest.param(
-            "flt_vectors",         "FLOAT_VECTOR", id="float_vectors_2_FLOAT_VECTOR"
+            "flt_vectors", "FLOAT_VECTOR", id="float_vectors_2_FLOAT_VECTOR"
         ),
         pytest.param(
-            "Normals",             "FLOAT_VECTOR", id="Normals_2_FLOAT_VECTOR"
+            "Normals", "FLOAT_VECTOR", id="Normals_2_FLOAT_VECTOR"
         ),
         pytest.param(
-            "Texture Coordinates", "FLOAT2",       id="Texture_Coordinates_2_FLOAT2"
+            "Texture Coordinates", "FLOAT2", id="Texture_Coordinates_2_FLOAT2"
         ),
         pytest.param(
-            "flt_tensors",         "FLOAT4X4",     id="float_tensors_2_FLOAT4X4",    marks=pytest.mark.xfail
+            "flt_tensors", "FLOAT4X4", id="float_tensors_2_FLOAT4X4",
+            marks=pytest.mark.xfail(reason="Not supported yet", strict=True),
         ),
     ]
 )
