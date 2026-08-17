@@ -111,8 +111,14 @@ class TestClass:
             #     https://docs.blender.org/api/current/bpy.types.FloatAttributeValue.html
             #     https://docs.blender.org/api/current/bpy.types.IntAttributeValue.html
             property_name = "value"
-        b_values = np.zeros_like(t_values) # To store the values returned by Blender
+        if data_type == "FLOAT4X4":
+            expected_values = np.zeros((len(t_values), 4, 4), dtype=t_values.dtype)
+            expected_values[:, :3, :3] = t_values.reshape((-1, 3, 3))
+        else:
+            expected_values = t_values
+
+        b_values = np.zeros_like(expected_values)
         mesh.attributes[t_name].data.foreach_get(property_name, np.ravel(b_values))
-        assert b_values == pytest.approx(t_values)
+        assert b_values == pytest.approx(expected_values)
         
     
