@@ -33,8 +33,5 @@ def set_attributes(dataset, fields):
                             msg = f"Unsupported vtkDataSetAttributes type: {f_type}."
                             raise ValueError(msg)
 
-    # Remove irrelevant fields
-    dataset.cell_data.remove("Texture Coordinates")
-    dataset.point_data.remove("Normals")
     return
     
