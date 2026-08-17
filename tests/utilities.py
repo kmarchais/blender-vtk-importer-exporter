@@ -38,7 +38,7 @@ def reload_modules(verbose=False):
     module_name, module_path = get_current_module()
     count = 0
     for name, module in sys.modules.copy().items():
-        if name.startswith((module_name, "utilities", "test_")):
+        if name.startswith((module_name, "utilities", "conftest_", "test_")):
             if verbose:
                 print(f"Reloading {name}")
             importlib.reload(module)

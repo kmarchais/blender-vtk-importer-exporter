@@ -15,6 +15,7 @@ ordered_list_of_tests = [
     "utilities",
     "mesh_get_mesh_data_from_vtk",
     "mesh_vtk_to_mesh",
+    "attributes_initialize_material_attributes",
     "--nomatch--" # Always last entry, do not delete
 ]
 
