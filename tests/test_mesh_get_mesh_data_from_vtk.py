@@ -122,58 +122,53 @@ m_mesh = import_submodule("mesh")
         ),
     ],
 )
-
 # Parametrization of the type of PyVista DataSet
 @pytest.mark.parametrize("dataset_type", ["PolyData", "UnstructuredGrid"])
-
-class TestClass:
+def test_counts(
+    dataset_type,
+    name, n_vertices, n_edges, n_faces, xout,
+    request
+):
+    match xout[dataset_type]:
+        case "pass":
+            pass
+        case "skip_ntest":
+            pytest.skip("Non-testable type(s) of cell")
+        case "xfail_dline":
+            request.node.add_marker(pytest.mark.xfail(
+                reason="PolyData conversion currently drops line cells",
+                raises=AssertionError,
+                strict=True,
+            ))
+        case "xfail_vsize":
+            request.node.add_marker(pytest.mark.xfail(
+                reason="cells_dict cannot handle these variable-size cells",
+                raises=ValueError,
+                strict=True,
+            ))
+        case _:
+            msg = f"Unsupported expected result: {xout[dataset_type]}."
+            raise ValueError(msg)
     
-    def test_counts(
-        self,
-        dataset_type,
-        name, n_vertices, n_edges, n_faces, xout,
-        request
-    ):
-        match xout[dataset_type]:
-            case "pass":
-                pass
-            case "skip_ntest":
-                pytest.skip("Non-testable type(s) of cell")
-            case "xfail_dline":
-                request.node.add_marker(pytest.mark.xfail(
-                    reason="PolyData conversion currently drops line cells",
-                    raises=AssertionError,
-                    strict=True,
-                ))
-            case "xfail_vsize":
-                request.node.add_marker(pytest.mark.xfail(
-                    reason="cells_dict cannot handle these variable-size cells",
-                    raises=ValueError,
-                    strict=True,
-                ))
-            case _:
-                msg = f"Unsupported expected result: {xout[dataset_type]}."
-                raise ValueError(msg)
-                
-        dataset = request.getfixturevalue(name)
-        match dataset_type:
-            case "PolyData":
-                vtk_data = dataset
-            case "UnstructuredGrid":
-                vtk_data = dataset.cast_to_unstructured_grid()
-            case _:
-                msg = f"Unsupported PyVista DataSet type: {dataset_type}."
-                raise ValueError(msg)
-                
-        vertices, edges, faces = m_mesh.get_mesh_data_from_vtk(vtk_data)
-
-        assert len(vertices) == n_vertices
-        assert len(edges)    == n_edges
-        if isinstance(n_faces, dict):
-            assert len(faces) == n_faces[dataset_type]
-        else:
-            assert len(faces) == n_faces
-
+    dataset = request.getfixturevalue(name)
+    match dataset_type:
+        case "PolyData":
+            vtk_data = dataset
+        case "UnstructuredGrid":
+            vtk_data = dataset.cast_to_unstructured_grid()
+        case _:
+            msg = f"Unsupported PyVista DataSet type: {dataset_type}."
+            raise ValueError(msg)
+    
+    vertices, edges, faces = m_mesh.get_mesh_data_from_vtk(vtk_data)
+    
+    assert len(vertices) == n_vertices
+    assert len(edges)    == n_edges
+    if isinstance(n_faces, dict):
+        assert len(faces) == n_faces[dataset_type]
+    else:
+        assert len(faces) == n_faces
+    
 
 @pytest.mark.xfail(
     reason="PIXEL connectivity needs perimeter ordering for Blender",
