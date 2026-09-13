@@ -16,80 +16,109 @@ m_mesh = import_submodule("mesh")
 #   n_faces:    Expected number of faces
 #               Can be different according to the type of PyVista DataSet
 #               Set to -1 for non-testable types of cell (e.g. PIXEL not supported by PolyData)
+#   xout:       Expected result of a test. Supported values are:
+#               - pass: no failure
+#               - skip_ntest: to skip non-testable types of cell
+#               - xfail_dline: expected failure because lines are not yet supported from PolyData
+#               - xfail_vsize: expected failure because variable sizes are not yet supported from UnstructuredGrid
 @pytest.mark.parametrize(
-    "name, n_vertices, n_edges, n_faces",
+    "name, n_vertices, n_edges, n_faces, xout",
     [
         pytest.param(
-            "PolyData_one_vertex", 1, 0, 0, id="one_vertex"
+            "PolyData_one_vertex", 1, 0, 0,
+            {"PolyData": "pass", "UnstructuredGrid": "pass"}, id="one_vertex",
         ),
         pytest.param(
-            "PolyData_one_polyvertex", 2, 0, 0, id="one_polyvertex"
+            "PolyData_one_polyvertex", 2, 0, 0,
+            {"PolyData": "pass", "UnstructuredGrid": "xfail_vsize"}, id="one_polyvertex"
         ),
         pytest.param(
-            "PolyData_one_line", 2, 1, 0, id="one_line"
+            "PolyData_one_line", 2, 1, 0,
+            {"PolyData": "xfail_dline", "UnstructuredGrid": "pass"}, id="one_line"
         ),
         pytest.param(
-            "PolyData_one_polyline", 3, 2, 0, id="one_polyline"
+            "PolyData_one_polyline", 3, 2, 0,
+            {"PolyData": "xfail_dline", "UnstructuredGrid": "xfail_vsize"}, id="one_polyline"
         ),
         pytest.param(
-            "PolyData_one_triangle", 3, 0, 1, id="one_triangle"
+            "PolyData_one_triangle", 3, 0, 1,
+            {"PolyData": "pass", "UnstructuredGrid": "pass"}, id="one_triangle"
         ),
         pytest.param(
-            "PolyData_one_quad", 4, 0, {"PolyData": 2, "UnstructuredGrid": 1}, id="one_quad"
+            "PolyData_one_quad", 4, 0, {"PolyData": 2, "UnstructuredGrid": 1},
+            {"PolyData": "pass", "UnstructuredGrid": "pass"}, id="one_quad"
         ),
         pytest.param(
-            "PolyData_one_polygon", 6, 0, {"PolyData": 4, "UnstructuredGrid": 1}, id="one_polygon"
+            "PolyData_one_polygon", 6, 0, {"PolyData": 4, "UnstructuredGrid": 1},
+            {"PolyData": "pass", "UnstructuredGrid": "xfail_vsize"}, id="one_polygon"
         ),
         pytest.param(
-            "PolyData_one_strip", 4, 0, 2, id="one_strip"
+            "PolyData_one_strip", 4, 0, 2,
+            {"PolyData": "pass", "UnstructuredGrid": "xfail_vsize"}, id="one_strip"
         ),
         pytest.param(
-            "PolyData_one_merged", 25, 3, {"PolyData": 9, "UnstructuredGrid": 5}, id="one_merged"
+            "PolyData_one_merged", 25, 3, {"PolyData": 9, "UnstructuredGrid": 5},
+            {"PolyData": "xfail_dline", "UnstructuredGrid": "xfail_vsize"}, id="one_merged"
         ),
         pytest.param(
-            "UnstructuredGrid_one_pixel", 4, 0, {"PolyData": -1, "UnstructuredGrid": 1}, id="one_pixel"
+            "UnstructuredGrid_one_pixel", 4, 0, {"PolyData": -1, "UnstructuredGrid": 1},
+            {"PolyData": "skip_ntest", "UnstructuredGrid": "pass"}, id="one_pixel"
         ),
         pytest.param(
-            "UnstructuredGrid_one_tetrahedron", 4, 0, {"PolyData": -1, "UnstructuredGrid": 0}, id="one_tetrahedron"
+            "UnstructuredGrid_one_tetrahedron", 4, 0, {"PolyData": -1, "UnstructuredGrid": 0},
+            {"PolyData": "skip_ntest", "UnstructuredGrid": "pass"}, id="one_tetrahedron"
         ),
         pytest.param(
-            "UnstructuredGrid_one_shuffled", 37, 7, {"PolyData": -1, "UnstructuredGrid": 10}, id="one_shuffled"
+            "UnstructuredGrid_one_shuffled", 37, 7, {"PolyData": -1, "UnstructuredGrid": 10},
+            {"PolyData": "skip_ntest", "UnstructuredGrid": "xfail_vsize"}, id="one_shuffled"
         ),
         pytest.param(
-            "PolyData_two_vertexes", 2, 0, 0, id="two_vertexes"
+            "PolyData_two_vertexes", 2, 0, 0,
+            {"PolyData": "pass", "UnstructuredGrid": "pass"}, id="two_vertexes"
         ),
         pytest.param(
-            "PolyData_two_polyvertexes", 5, 0, 0, id="two_polyvertexes"
+            "PolyData_two_polyvertexes", 5, 0, 0,
+            {"PolyData": "pass", "UnstructuredGrid": "xfail_vsize"}, id="two_polyvertexes"
         ),
         pytest.param(
-            "PolyData_two_lines", 3, 2, 0, id="two_lines"
+            "PolyData_two_lines", 3, 2, 0,
+            {"PolyData": "xfail_dline", "UnstructuredGrid": "pass"}, id="two_lines"
         ),
         pytest.param(
-            "PolyData_two_polylines", 6, 5, 0, id="two_polylines"
+            "PolyData_two_polylines", 6, 5, 0,
+            {"PolyData": "xfail_dline", "UnstructuredGrid": "xfail_vsize"}, id="two_polylines"
         ),
         pytest.param(
-            "PolyData_two_triangles", 4, 0, 2, id="two_triangles"
+            "PolyData_two_triangles", 4, 0, 2,
+            {"PolyData": "pass", "UnstructuredGrid": "pass"}, id="two_triangles"
         ),
         pytest.param(
-            "PolyData_two_quads", 6, 0, {"PolyData": 4, "UnstructuredGrid": 2}, id="two_quads"
+            "PolyData_two_quads", 6, 0, {"PolyData": 4, "UnstructuredGrid": 2},
+            {"PolyData": "pass", "UnstructuredGrid": "pass"}, id="two_quads"
         ),
         pytest.param(
-            "PolyData_two_polygons", 9, 0, {"PolyData": 7, "UnstructuredGrid": 2}, id="two_polygons"
+            "PolyData_two_polygons", 9, 0, {"PolyData": 7, "UnstructuredGrid": 2},
+            {"PolyData": "pass", "UnstructuredGrid": "xfail_vsize"}, id="two_polygons"
         ),
         pytest.param(
-            "PolyData_two_strips", 7, 0, 5, id="two_strips"
+            "PolyData_two_strips", 7, 0, 5,
+            {"PolyData": "pass", "UnstructuredGrid": "xfail_vsize"}, id="two_strips"
         ),
         pytest.param(
-            "PolyData_two_merged", 31, 7, {"PolyData": 18, "UnstructuredGrid": 8}, id="two_merged"
+            "PolyData_two_merged", 31, 7, {"PolyData": 18, "UnstructuredGrid": 8},
+            {"PolyData": "xfail_dline", "UnstructuredGrid": "xfail_vsize"}, id="two_merged"
         ),
         pytest.param(
-            "UnstructuredGrid_two_pixels", 6, 0, {"PolyData": -1, "UnstructuredGrid": 2}, id="two_pixels"
+            "UnstructuredGrid_two_pixels", 6, 0, {"PolyData": -1, "UnstructuredGrid": 2},
+            {"PolyData": "skip_ntest", "UnstructuredGrid": "pass"}, id="two_pixels"
         ),
         pytest.param(
-            "UnstructuredGrid_two_tetrahedrons", 6, 0, {"PolyData": -1, "UnstructuredGrid": 0}, id="two_tetrahedrons"
+            "UnstructuredGrid_two_tetrahedrons", 6, 0, {"PolyData": -1, "UnstructuredGrid": 0},
+            {"PolyData": "skip_ntest", "UnstructuredGrid": "pass"}, id="two_tetrahedrons"
         ),
         pytest.param(
-            "UnstructuredGrid_two_shuffled", 37, 7, {"PolyData": -1, "UnstructuredGrid": 10}, id="two_shuffled"
+            "UnstructuredGrid_two_shuffled", 37, 7, {"PolyData": -1, "UnstructuredGrid": 10},
+            {"PolyData": "skip_ntest", "UnstructuredGrid": "xfail_vsize"}, id="two_shuffled"
         ),
     ],
 )
@@ -102,12 +131,29 @@ class TestClass:
     def test_counts(
         self,
         dataset_type,
-        name, n_vertices, n_edges, n_faces,
+        name, n_vertices, n_edges, n_faces, xout,
         request
     ):
-        if isinstance(n_faces, dict):
-            if n_faces[dataset_type] < 0:
+        match xout[dataset_type]:
+            case "pass":
+                pass
+            case "skip_ntest":
                 pytest.skip("Non-testable type(s) of cell")
+            case "xfail_dline":
+                request.node.add_marker(pytest.mark.xfail(
+                    reason="PolyData conversion currently drops line cells",
+                    raises=AssertionError,
+                    strict=True,
+                ))
+            case "xfail_vsize":
+                request.node.add_marker(pytest.mark.xfail(
+                    reason="cells_dict cannot handle these variable-size cells",
+                    raises=ValueError,
+                    strict=True,
+                ))
+            case _:
+                msg = f"Unsupported expected result: {xout[dataset_type]}."
+                raise ValueError(msg)
                 
         dataset = request.getfixturevalue(name)
         match dataset_type:
@@ -120,7 +166,7 @@ class TestClass:
                 raise ValueError(msg)
                 
         vertices, edges, faces = m_mesh.get_mesh_data_from_vtk(vtk_data)
-        
+
         assert len(vertices) == n_vertices
         assert len(edges)    == n_edges
         if isinstance(n_faces, dict):
