@@ -75,13 +75,15 @@ class TestClass:
     
     def test_domain_type(
         self,
-        pvUG_one_triangle, # PyVista DataSet with attributes
+        PolyData_one_triangle, # PyVista DataSet with attributes
         t_domain, b_domain, suffix, # Domain of the attribute
         name, data_type # Type of data stored in attribute 
     ):
+        vtk_data = PolyData_one_triangle
+        
         # Mesh and Material setup
         mesh_name = unique_mesh_name()
-        mesh = m_mesh.vtk_to_mesh(pvUG_one_triangle, mesh_name)
+        mesh = m_mesh.vtk_to_mesh(vtk_data, mesh_name)
         mat = bpy.data.materials.new(name=f"{mesh_name}_attributes")
         mat["attributes"] = {}
         
@@ -89,7 +91,7 @@ class TestClass:
         t_name = name
         if name not in ("Texture Coordinates", "Normals"):
             t_name += suffix
-        t_data = getattr(pvUG_one_triangle, t_domain)
+        t_data = getattr(vtk_data, t_domain)
         if t_data.get(t_name) is None:
             pytest.skip("Irrelevant attribute")
         t_values = t_data[t_name]

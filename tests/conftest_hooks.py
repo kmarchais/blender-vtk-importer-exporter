@@ -7,7 +7,7 @@ import pytest
 
 
 # Specify the order of tests
-#   see https://stackoverflow.com/questions/17571438/how-to-control-test-case-execution-order-in-pytest
+#   See https://stackoverflow.com/questions/17571438/how-to-control-test-case-execution-order-in-pytest
 
 # Ordered list of substring expressions to match
 #   The tests that do not match any expression are run last
@@ -32,4 +32,10 @@ def tests_order(item: pytest.Item) -> int:
 
 def pytest_collection_modifyitems(items):
     items.sort(key=tests_order)
+    
+
+# Manage the command line options
+#    See https://docs.pytest.org/en/stable/reference/reference.html#pytest.hookspec.pytest_addoption
+def pytest_addoption(parser):
+    parser.addoption("--dump", action="store_true", help="dump manufactured datasets")
     
