@@ -13,10 +13,10 @@ jobs:
     timeout-minutes: 25
     env:
       BLENDER_VERSION: 5.2.2
-      BLENDER_USER_SCRIPTS: ${{ runner.temp }}/blender-profile/scripts
-      BLENDER_USER_CONFIG: ${{ runner.temp }}/blender-profile/config
-      BLENDER_USER_EXTENSIONS: ${{ runner.temp }}/blender-profile/extensions
-      MPLCONFIGDIR: ${{ runner.temp }}/matplotlib
+      BLENDER_USER_SCRIPTS: ${{ github.workspace }}/.ci/blender-profile/scripts
+      BLENDER_USER_CONFIG: ${{ github.workspace }}/.ci/blender-profile/config
+      BLENDER_USER_EXTENSIONS: ${{ github.workspace }}/.ci/blender-profile/extensions
+      MPLCONFIGDIR: ${{ github.workspace }}/.ci/matplotlib
     steps:
       - uses: actions/checkout@v7
         with:
