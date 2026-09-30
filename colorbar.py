@@ -1,7 +1,7 @@
 import bpy
 import numpy as np
 
-import matplotlib.pyplot as plt
+from matplotlib import colormaps
 
 from .attributes import update_attributes_from_vtk
 
@@ -48,7 +48,7 @@ def create_colorbar(context):
 
     #cbar_mat.vtk_colormaps = colormap
     color_ramp_node = cbar_mat.node_tree.nodes.new("ShaderNodeValToRGB")
-    cmap = plt.get_cmap(mat.vtk_colormaps)
+    cmap = colormaps[mat.vtk_colormaps]
 
     # remove last element to create it again in the last iteration to have it selected
     last_elem = color_ramp_node.color_ramp.elements[-1]
@@ -155,7 +155,7 @@ def update_colorbar(self, context):
     cbar_label_mat = bpy.data.materials[f"{cbar_name}_labels"]
 
     color_ramp_node = cbar_mat.node_tree.nodes["Color Ramp"]
-    cmap = plt.get_cmap(mat.vtk_colormaps)
+    cmap = colormaps[mat.vtk_colormaps]
     n_colors = len(color_ramp_node.color_ramp.elements)
     for i in range(n_colors):
         location = i / (n_colors - 1)
@@ -201,3 +201,4 @@ def remove_colorbar(context):
     bpy.data.curves.remove(max_range_curve)
     attribute_curve = bpy.data.curves[f"{mat.name}_attribute_name"]
     bpy.data.curves.remove(attribute_curve)
+

@@ -2,10 +2,12 @@ from __future__ import annotations
 import importlib
 import subprocess
 import sys
+from importlib.metadata import version
 
 import bpy
 
 from . import dependencies
+from .colormaps import register_crameri_colormaps
 from .material_panel import vtk_enum_colormaps, get_availbale_colormaps
 
 COLORMAP = "viridis"
@@ -13,10 +15,13 @@ COLORMAP = "viridis"
 def get_dependencies_versions():
     for dependency, dep_dict in dependencies.items():
         try:
-            module = importlib.import_module(dependency)
-            dep_dict["module"] = module
-            dep_dict["version"] = module.__version__
-        except ModuleNotFoundError:
+            if dependency == "cmcrameri":
+                dep_dict["version"] = version(dependency)
+            else:
+                module = importlib.import_module(dependency)
+                dep_dict["module"] = module
+                dep_dict["version"] = module.__version__
+        except ImportError:
             dep_dict["version"] = "Not installed"
 
 get_dependencies_versions()
@@ -31,7 +36,9 @@ class VTK_OT_Upgrade_Dependencies(bpy.types.Operator):
     def execute(self, context):
         for dependency, dep_dict in dependencies.items():
             subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", dependency])
-            importlib.reload(dep_dict["module"])
+            if "module" in dep_dict:
+                importlib.reload(dep_dict["module"])
+        register_crameri_colormaps()
         get_dependencies_versions()
         return {"FINISHED"}
 
@@ -103,3 +110,4 @@ def unregister():
     del bpy.types.Scene.number_elem_cmap
     bpy.utils.unregister_class(VTK_OT_Upgrade_Dependencies)
     bpy.utils.unregister_class(VtkImporterPreferences)
+
