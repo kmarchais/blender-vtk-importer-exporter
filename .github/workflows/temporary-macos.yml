@@ -70,4 +70,4 @@ jobs:
         run: '"$BLENDER_PYTHON" tests/check_colormaps.py'
       - name: Existing mesh and attribute suite
         working-directory: tests
-        run: '"$BLENDER" --background --factory-startup --python-exit-code 1 --python run_pytest_in_blender.py'
+        run: 'PYTHONPATH="$PWD" "$BLENDER" --python-use-system-env --background --factory-startup --python-exit-code 1 --python run_pytest_in_blender.py'
