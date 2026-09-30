@@ -1,5 +1,5 @@
 import bpy
-import matplotlib.pyplot as plt
+from matplotlib import colormaps
 
 
 def create_attribute_material_nodes(mesh_name):
@@ -32,7 +32,7 @@ def create_attribute_material_nodes(mesh_name):
     mat.vtk_colormaps = colormap
     n_colors = bpy.context.scene.number_elem_cmap
     color_ramp_node = mat.node_tree.nodes.new("ShaderNodeValToRGB")
-    cmap = plt.get_cmap(colormap)
+    cmap = colormaps[colormap]
     color_ramp_node.color_ramp.elements.remove(
         color_ramp_node.color_ramp.elements[-1]
     )  # remove to create it again in the last iteration to have it selected
@@ -158,3 +158,4 @@ def convert_mesh_to_pointcloud(mesh_name):
     geo_node.links.new(
         set_material_node.outputs["Geometry"], output_node.inputs["Geometry"]
     )
+

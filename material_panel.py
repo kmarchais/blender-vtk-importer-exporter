@@ -2,7 +2,7 @@ import warnings
 from typing import Literal
 
 import bpy
-import matplotlib.pyplot as plt
+from matplotlib import colormaps as mpl_colormaps
 
 from .colorbar import create_colorbar, remove_colorbar, update_colorbar
 
@@ -187,7 +187,7 @@ class MATERIAL_PT_VTK_Attributes(bpy.types.Panel):
 
 
 def get_availbale_colormaps():
-    colormaps = list(filter(lambda cmap: cmap[-2:] != "_r", plt.colormaps()))
+    colormaps = list(filter(lambda cmap: cmap[-2:] != "_r", mpl_colormaps))
     return sorted(colormaps, key=lambda s: s.split(".")[-1].lower())
 
 
@@ -235,7 +235,7 @@ def update_colormap_enum(self, context):
     if "Color Ramp" not in self.node_tree.nodes:
         return
     color_ramp_node = self.node_tree.nodes["Color Ramp"]
-    cmap = plt.get_cmap(self.vtk_colormaps)
+    cmap = mpl_colormaps[self.vtk_colormaps]
     n_colors = len(color_ramp_node.color_ramp.elements)
     for i in range(n_colors):
         location = i / (n_colors - 1)
@@ -356,3 +356,4 @@ def unregister():
     bpy.utils.unregister_class(VTK_OT_Data_range_all_frames)
     bpy.utils.unregister_class(VTK_OT_Data_range_current_frame)
     bpy.utils.unregister_class(VTK_OT_Data_range_custom)
+

@@ -6,6 +6,7 @@ dependencies = {
 
 import site
 import sys
+from importlib.metadata import version
 user_site = site.getusersitepackages()
 if user_site not in sys.path:
     sys.path.append(user_site)
@@ -13,13 +14,22 @@ if user_site not in sys.path:
 for dependency in dependencies:
     if dependency != "pip":
         try:
-            __import__(dependency)
+            if dependency == "cmcrameri":
+                # Importing cmcrameri also imports pyplot and scans system fonts.
+                version(dependency)
+            else:
+                __import__(dependency)
         except ImportError:
             import subprocess
             import importlib
             
             subprocess.call([sys.executable, "-m", "pip", "install", dependency])
-            importlib.import_module(dependency)
+            if dependency != "cmcrameri":
+                importlib.import_module(dependency)
+
+from .colormaps import register_crameri_colormaps
+
+register_crameri_colormaps()
 
 import bpy
 from bpy.app.handlers import persistent
@@ -67,3 +77,4 @@ def unregister():
 
     bpy.app.handlers.frame_change_post.remove(bpy.types.WindowManager.on_frame_change)
     del bpy.types.WindowManager.on_frame_change
+

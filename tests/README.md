@@ -60,8 +60,29 @@ main(details=2, pytest_args=["-k get_mesh_data_from_vtk"])
 
 Then use `Text > Save` and rerun the script.
 
+# Installation and color-map regression checks
+
+Run these checks from the repository root in separate processes:
+
+```
+blender --background --factory-startup --python-use-system-env --python-exit-code 1 --python tests/check_installation.py
+python tests/check_colormaps.py
+```
+
+The installation check makes Matplotlib font-manager imports raise `KeyError('_items')`,
+matching the macOS font-discovery failure reported in issue #14. It exercises Blender's
+add-on enable and disable operators, reactivation, and material color ramps without
+loading pyplot or cmcrameri's plotting helpers. It requires the add-on dependencies
+to be installed in Blender's Python environment.
+
+The color-map check compares every registered Crameri map, including reversed maps,
+with cmcrameri's original registrations at 513 sample values. Run it with a Python
+environment that has numpy, matplotlib and cmcrameri installed. Unlike the installation
+check, this comparison intentionally imports cmcrameri and needs working font discovery.
+
 # Known issues
 
 - On quitting Blender GUI, an exception can be raised in module `unregister()`. It is related to reloading modules before running `pytest`. However, it does not seem to affect the results of `pytest`.
 
 - Due to the caching mechanism of Python import system, renamed or deleted tests are still run when Blender GUI is used. One workaround is to restart Blender. An other one is to purge the `tests/__pycache__` directory.
+
