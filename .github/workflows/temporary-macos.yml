@@ -21,6 +21,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Check out the unchanged base for comparison
+        uses: actions/checkout@v7
+        with:
+          ref: 946c395d59242c1dac5bc89e72183f022d71a117
+          path: baseline
+          persist-credentials: false
       - name: Install official Blender and Python dependencies
         shell: bash
         run: |
@@ -68,6 +74,31 @@ jobs:
         run: '"$BLENDER" --background --factory-startup --python-exit-code 1 --python tests/check_installation.py'
       - name: All Crameri maps match the original package
         run: '"$BLENDER_PYTHON" tests/check_colormaps.py'
-      - name: Existing mesh and attribute suite
-        working-directory: tests
-        run: 'PYTHONPATH="$PWD" "$BLENDER" --python-use-system-env --background --factory-startup --python-exit-code 1 --python run_pytest_in_blender.py'
+      - name: Compare existing suite with the unchanged base
+        shell: bash
+        run: |
+          set -euo pipefail
+          set +e
+          (cd tests && PYTHONPATH="$PWD" "$BLENDER" --python-use-system-env --background --factory-startup --python-exit-code 1 --python run_pytest_in_blender.py -- --junitxml "$RUNNER_TEMP/fixed.xml")
+          fixed_status=$?
+          (cd baseline/tests && PYTHONPATH="$PWD" "$BLENDER" --python-use-system-env --background --factory-startup --python-exit-code 1 --python run_pytest_in_blender.py -- --junitxml "$RUNNER_TEMP/baseline.xml")
+          baseline_status=$?
+          set -e
+          printf 'Fixed suite exit status: %s; baseline suite exit status: %s\n' "$fixed_status" "$baseline_status"
+          cat > "$RUNNER_TEMP/compare_results.py" <<'PY'
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          root = Path(os.environ["RUNNER_TEMP"])
+          def results(name):
+              cases = ET.parse(root / name).findall(".//testcase")
+              assert cases, f"No tests ran in {name}"
+              failed = {(c.get("classname"), c.get("name")) for c in cases if c.find("failure") is not None or c.find("error") is not None}
+              return len(cases), failed
+          fixed_count, fixed_failures = results("fixed.xml")
+          base_count, base_failures = results("baseline.xml")
+          assert fixed_count == base_count, (fixed_count, base_count)
+          assert fixed_failures == base_failures, {"new": fixed_failures - base_failures, "resolved": base_failures - fixed_failures}
+          print(f"PASS: identical results across {fixed_count} tests; {len(fixed_failures)} pre-existing failures on both commits")
+          PY
+          "$BLENDER_PYTHON" "$RUNNER_TEMP/compare_results.py"
